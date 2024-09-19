@@ -1,25 +1,18 @@
 "use client";
 import { Button } from "@nextui-org/button";
 import { Input } from "@nextui-org/input";
-import { Listbox, ListboxItem } from "@nextui-org/listbox";
-import { memo, useState } from "react";
-import { Selection } from "@nextui-org/react";
+import { memo } from "react";
 
-import {
-  IOrgschemaMenuSection,
-  IOrgschemaMenuSteps,
-  useOrgschemaMenu,
-} from "../../model/store/orgschemaMenu";
-import { RoutesList, SchemasList } from "../../model/data/data";
+import { IOrgschemaMenuSection } from "../../model/store/orgschemaMenu";
+import { useOrgschemaMenuList } from "../../model/hooks/useOrgschemaMenuList";
+
+import { OrgschemaListbox } from "./OrgschemaListbox/OrgschemaListbox";
 
 import {
   AddIcon,
   CloudActionIcon,
-  OrgSchemaIcon,
-  RoutesIcon,
   SearchListIcon,
 } from "@/src/shared/assets/icons";
-import { subtitle } from "@/components/primitives";
 
 interface OrgschemaMenuListProps {
   className?: string;
@@ -28,35 +21,14 @@ interface OrgschemaMenuListProps {
 export const OrgschemaMenuList = memo((props: OrgschemaMenuListProps) => {
   const { className } = props;
 
-  const currentSection = useOrgschemaMenu((state) => state.currentSection);
-
-  const setSchema = useOrgschemaMenu((state) => state.setSchema);
-  const setStep = useOrgschemaMenu((state) => state.setStep);
-  const setRoute = useOrgschemaMenu((state) => state.setRoute);
-
-  const [selectedKeys, setSelectedKeys] = useState<Selection | undefined>();
-
-  const handleSelectionChange = (keys: Selection) => {
-    setSelectedKeys(keys);
-  };
-
-  const handleContinue = () => {
-    if (selectedKeys !== "all" && selectedKeys) {
-      const values = Array.from(selectedKeys).join(", ");
-
-      if (currentSection === IOrgschemaMenuSection.SCHEMAS) {
-        setSchema(values[0]);
-        setStep(IOrgschemaMenuSteps.MANAGE);
-
-        return;
-      }
-
-      setRoute(values[0]);
-      setStep(IOrgschemaMenuSteps.MANAGE);
-
-      return;
-    }
-  };
+  const {
+    currentSection,
+    handleLoadSchemaById,
+    error,
+    isError,
+    isLoading,
+    activeSchemaId,
+  } = useOrgschemaMenuList();
 
   return (
     <form className="h-full flex flex-col justify-between">
@@ -71,35 +43,7 @@ export const OrgschemaMenuList = memo((props: OrgschemaMenuListProps) => {
           type="text"
         />
 
-        <Listbox
-          disallowEmptySelection
-          aria-label="orgschema list"
-          color="primary"
-          selectedKeys={selectedKeys}
-          selectionMode="single"
-          variant="faded"
-          onSelectionChange={handleSelectionChange}
-        >
-          {currentSection === IOrgschemaMenuSection.SCHEMAS
-            ? SchemasList.map((schema) => (
-                <ListboxItem
-                  key={schema.name}
-                  aria-label={schema.name}
-                  startContent={<OrgSchemaIcon size={40} />}
-                >
-                  <p className={subtitle()}>{schema.name}</p>
-                </ListboxItem>
-              ))
-            : RoutesList.map((route) => (
-                <ListboxItem
-                  key={route.name}
-                  aria-label={route.name}
-                  startContent={<RoutesIcon size={40} />}
-                >
-                  <p className={subtitle()}>{route.name}</p>
-                </ListboxItem>
-              ))}
-        </Listbox>
+        <OrgschemaListbox />
       </div>
 
       <div className="flex flex-col gap-2">
@@ -117,9 +61,10 @@ export const OrgschemaMenuList = memo((props: OrgschemaMenuListProps) => {
         <Button
           color="primary"
           endContent={<CloudActionIcon size={30} />}
-          isDisabled={!selectedKeys}
+          isDisabled={!activeSchemaId}
+          isLoading={isLoading}
           size="lg"
-          onClick={handleContinue}
+          onClick={handleLoadSchemaById}
         >
           {currentSection === IOrgschemaMenuSection.SCHEMAS
             ? "Загрузить схему"

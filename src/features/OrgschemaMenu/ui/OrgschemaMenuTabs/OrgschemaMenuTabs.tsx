@@ -18,14 +18,10 @@ export const OrgschemaMenuTabs = memo((props: OrgschemaMenuTabsProps) => {
   const { className } = props;
 
   const currentSection = useOrgschemaMenu((state) => state.currentSection);
-
-  const currentOrg = useOrgschemaMenu((state) => state.currentSchema);
-  const currentRoute = useOrgschemaMenu((state) => state.currentRoute);
+  const loadedSchema = useOrgschemaMenu((state) => state.loadedSchema);
 
   const setStep = useOrgschemaMenu((state) => state.setStep);
   const currentStep = useOrgschemaMenu((state) => state.currentStep);
-
-  const isManageDisabled = !currentOrg && !currentRoute;
 
   const handleSelectionChange = (key: Key) => {
     const step = key as IOrgschemaMenuSteps;
@@ -65,7 +61,7 @@ export const OrgschemaMenuTabs = memo((props: OrgschemaMenuTabsProps) => {
       <Tab
         key={IOrgschemaMenuSteps.MANAGE}
         isDisabled={
-          currentSection === IOrgschemaMenuSection.NONE || isManageDisabled
+          currentSection === IOrgschemaMenuSection.NONE || !loadedSchema
         }
         title={
           <div className="flex items-center space-x-2">

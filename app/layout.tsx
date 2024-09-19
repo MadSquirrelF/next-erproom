@@ -32,18 +32,20 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html suppressHydrationWarning lang="ru">
+    <html suppressHydrationWarning className="w-screen min-w-screen" lang="ru">
       <head />
       <body
         className={clsx(
-          "min-h-screen bg-background font-sans antialiased",
+          "min-h-screen bg-background w-screen font-sans antialiased",
           fontSans.variable,
         )}
       >
         <Providers themeProps={{ attribute: "class", defaultTheme: "light" }}>
-          <div className="relative flex flex-row h-screen w-screen">
+          <div className="relative flex flex-row h-screen w-full">
             <Sidebar />
-            <main className="h-full flex-grow">{children}</main>
+            <main className="relative h-full flex-grow w-[calc(100vw-80px)]">
+              {children}
+            </main>
           </div>
         </Providers>
       </body>

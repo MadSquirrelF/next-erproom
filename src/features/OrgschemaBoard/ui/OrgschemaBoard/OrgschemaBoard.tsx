@@ -1,18 +1,15 @@
 "use client";
 
-import { Card, CardBody } from "@nextui-org/card";
 import { memo, useCallback } from "react";
-import { Button } from "@nextui-org/button";
 import { CSSTransition, SwitchTransition } from "react-transition-group";
+import { Card, CardBody } from "@nextui-org/card";
 
 import {
   IOrgschemaMenuSection,
   useOrgschemaMenu,
 } from "@/src/features/OrgschemaMenu/model/store/orgschemaMenu";
 import { OrgschemaStart } from "@/src/features/OrgschemaStart/ui/OrgschemaStart";
-import { Node } from "@/src/entities/Node/ui/Node/Node";
-import { ZoomInIcon, ZoomOutIcon } from "@/src/shared/assets/icons";
-import { title } from "@/components/primitives";
+import { SchemaTree } from "@/src/entities/Schema/ui/SchemaTree/SchemaTree";
 
 interface OrgschemaBoardProps {
   className?: string;
@@ -23,37 +20,15 @@ export const OrgschemaBoard = memo((props: OrgschemaBoardProps) => {
 
   const currentSection = useOrgschemaMenu((state) => state.currentSection);
 
-  const currentSchema = useOrgschemaMenu((state) => state.currentSchema);
+  const loadedSchema = useOrgschemaMenu((state) => state.loadedSchema);
   const currentRoute = useOrgschemaMenu((state) => state.currentRoute);
 
   const renderBlock = useCallback(
     (currentSection: IOrgschemaMenuSection) => {
       switch (currentSection) {
         case IOrgschemaMenuSection.SCHEMAS:
-          if (currentSchema) {
-            return (
-              <>
-                <Node />
-                <div
-                  className={`flex z-20 absolute right-5 top-5 flex-row gap-4 items-center`}
-                >
-                  <Button isIconOnly color="primary">
-                    <ZoomInIcon />
-                  </Button>
-                  <p
-                    className={title({
-                      size: "tiny",
-                      bold: "bold",
-                    })}
-                  >
-                    1x
-                  </p>
-                  <Button isIconOnly color="primary">
-                    <ZoomOutIcon />
-                  </Button>
-                </div>
-              </>
-            );
+          if (loadedSchema) {
+            return <SchemaTree />;
           }
 
           return (
@@ -72,29 +47,7 @@ export const OrgschemaBoard = memo((props: OrgschemaBoardProps) => {
           );
         case IOrgschemaMenuSection.ROUTES:
           if (currentRoute) {
-            return (
-              <>
-                <Node />
-                <div
-                  className={`flex z-20 absolute right-5 top-5 flex-row gap-4 items-center`}
-                >
-                  <Button isIconOnly color="primary">
-                    <ZoomInIcon />
-                  </Button>
-                  <p
-                    className={title({
-                      size: "tiny",
-                      bold: "bold",
-                    })}
-                  >
-                    1x
-                  </p>
-                  <Button isIconOnly color="primary">
-                    <ZoomOutIcon />
-                  </Button>
-                </div>
-              </>
-            );
+            return <SchemaTree />;
           }
 
           return (
@@ -114,12 +67,12 @@ export const OrgschemaBoard = memo((props: OrgschemaBoardProps) => {
           );
       }
     },
-    [currentSchema, currentRoute],
+    [currentRoute, loadedSchema],
   );
 
   return (
-    <Card className="w-full h-full flex flex-row justify-center">
-      <CardBody className="overflow-hidden relative h-full items-center">
+    <Card className="overflow-x-auto overflow-y-auto w-full  relative h-full items-center">
+      <CardBody>
         <SwitchTransition mode="out-in">
           <CSSTransition
             key={currentSection}

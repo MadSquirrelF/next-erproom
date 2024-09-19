@@ -1,16 +1,30 @@
+export interface INodeSetting {
+  id: number;
+  orgboard_block_id: number;
+  color_block: string;
+  color_branch: string;
+  sort: number;
+  is_together: boolean;
+}
+
+export interface INodeEmployee {
+  id: number;
+  orgboard_block_id: number;
+  user_id: number;
+}
 export interface INode {
   id: number;
-  orgboard_id: number; // id cхемы, к которому относится блок ветка
-  parent_id: number; // id родителя
+  orgboard_scheme_id: number;
+  parent_id: number;
   name: string;
   description: string;
   description_secondary: string;
-  color_block: string; // цвет блока
-  color_branch: string; // цвет ветки
-  sort: number; // сортировка вывода
-  is_together: boolean;
   cloud: string;
-  created_at: string;
-  updated_at: string;
+  mail: string;
+  created_at: string | null;
+  updated_at: string | null;
   deleted_at: string | null;
+  setting: INodeSetting;
+  employee: INodeEmployee[];
+  all_children_blocks: INode[] | [];
 }
