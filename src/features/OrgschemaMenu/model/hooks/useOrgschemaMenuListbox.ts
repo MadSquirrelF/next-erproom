@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useCallback, useMemo } from "react";
-import { Selection } from "@nextui-org/react";
+import { Key, useMemo } from "react";
 
 import { OrgschemaService } from "../services/orgschema";
 import { useOrgschemaMenu } from "../store/orgschemaMenu";
@@ -9,6 +8,7 @@ import { ISchema } from "@/src/entities/Schema";
 
 export const useOrgschemaMenuListbox = () => {
   const currentSection = useOrgschemaMenu((state) => state.currentSection);
+  const activeSchemaId = useOrgschemaMenu((state) => state.activeSchemaId);
   const setActiveSchemaId = useOrgschemaMenu(
     (state) => state.setActiveSchemaId,
   );
@@ -20,11 +20,11 @@ export const useOrgschemaMenuListbox = () => {
   });
 
   // Обработка выбора схемы
-  const handleSelectionChange = useCallback((keys: Selection) => {
-    const id = Array.from(keys)[0];
-
-    setActiveSchemaId(Number(id));
-  }, []);
+  const handleSelectSchema = (schemaId: Key | null) => {
+    schemaId === null
+      ? setActiveSchemaId(undefined)
+      : setActiveSchemaId(Number(schemaId));
+  };
 
   return useMemo(
     () => ({
@@ -32,9 +32,18 @@ export const useOrgschemaMenuListbox = () => {
       isLoading,
       isError,
       error,
-      handleSelectionChange,
+      handleSelectSchema,
       currentSection,
+      activeSchemaId,
     }),
-    [data, isLoading, isError, error, currentSection],
+    [
+      data,
+      isLoading,
+      isError,
+      error,
+      activeSchemaId,
+      currentSection,
+      handleSelectSchema,
+    ],
   );
 };

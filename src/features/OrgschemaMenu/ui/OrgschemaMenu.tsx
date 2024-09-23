@@ -2,6 +2,7 @@
 import { Card, CardBody, CardHeader } from "@nextui-org/card";
 import { memo, useCallback } from "react";
 import { CSSTransition, SwitchTransition } from "react-transition-group";
+import { ScrollShadow } from "@nextui-org/scroll-shadow";
 
 import {
   IOrgschemaMenuSteps,
@@ -43,26 +44,28 @@ export const OrgschemaMenu = memo((props: OrgschemaMenuProps) => {
       className={`w-1/3 h-full p-2 z-10 relative transition-all duration-300`}
     >
       <OrgschemaMenuTopBg
-        className="absolute top-0 opacity-45 left-0 w-[800px]"
+        className="absolute top-0 opacity-25 left-0 w-[800px]"
         height={350}
       />
       <CardHeader className="flex flex-col items-start gap-3">
         <OrgschemaMenuTabs />
       </CardHeader>
-      <CardBody className="flex flex-col justify-between overflow-hidden">
-        <SwitchTransition mode="out-in">
-          <CSSTransition
-            key={currentStep}
-            unmountOnExit
-            classNames="fade"
-            timeout={300}
-          >
-            {renderCurrentStep(currentStep)}
-          </CSSTransition>
-        </SwitchTransition>
+      <CardBody className="flex flex-col justify-between h-full">
+        <ScrollShadow className="h-full w-full pr-2">
+          <SwitchTransition mode="out-in">
+            <CSSTransition
+              key={currentStep}
+              unmountOnExit
+              classNames="fade"
+              timeout={300}
+            >
+              {renderCurrentStep(currentStep)}
+            </CSSTransition>
+          </SwitchTransition>
+        </ScrollShadow>
       </CardBody>
       <OrgschemaMenuLeftBg
-        className="absolute bottom-6 -z-10 opacity-45 left-0 w-[600px]"
+        className="absolute bottom-6 -z-10 opacity-25 left-0 w-[600px]"
         height={250}
       />
     </Card>

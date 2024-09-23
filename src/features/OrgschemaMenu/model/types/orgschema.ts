@@ -13,6 +13,10 @@ export interface ISchemaDataById {
   scheme: ISchema;
 }
 
+export interface IBlockSchemaId {
+  orgboard_block_id: number;
+}
+
 export interface ISchemasResponse {
   success: boolean;
   statusCode: number;
@@ -29,4 +33,8 @@ export interface IAllSchemasResponse extends ISchemasResponse {
 
 export interface IAllBlocksSchemasResponse extends ISchemasResponse {
   data: IAllBlocksSchemasData;
+}
+
+export interface ICreateBlockSchemasResponse extends ISchemasResponse {
+  data: IBlockSchemaId;
 }

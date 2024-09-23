@@ -1,129 +1,98 @@
+"use client";
+
 import { Avatar, AvatarGroup } from "@nextui-org/avatar";
 import { Button } from "@nextui-org/button";
 import { Card, CardBody } from "@nextui-org/card";
-import { Input, Textarea } from "@nextui-org/input";
 import { Tooltip } from "@nextui-org/tooltip";
 import { memo } from "react";
+import {
+  Chip,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@nextui-org/react";
 
 import { UserListData } from "../../../model/data/data";
+import { useOrgschemaMenuManage } from "../../../model/hooks/useOrgschemaMenuManageBlock";
+import { useOrgschemaMenu } from "../../../model/store/orgschemaMenu";
 
 import {
+  AddIcon,
   AddUserIcon,
-  CopyIcon,
+  DateCrateIcon,
+  DateEditIcon,
   EditIcon,
   EyeOpenedIcon,
-  LinkIcon,
   PaperClipIcon,
-  SettingsIcon,
+  TrashIcon,
   TreeClosedIcon,
 } from "@/src/shared/assets/icons";
 import { subtitle } from "@/components/primitives";
-import { INode } from "@/src/entities/Node";
 import {
   getUsersByEmployee,
   returnUserColorStatus,
 } from "@/src/shared/utils/userFunctions/userFunctions";
+import { OrgschemaSelectBlockBg } from "@/src/shared/assets/OrgschemaSelectBlockBg/OrgschemaSelectBlockBg";
+import { getTimeDifferenceFromCreationDate } from "@/src/shared/utils/Date/Date";
 
 interface OrgschemaMenuManageBlockProps {
   className?: string;
-  block: INode;
 }
 
 export const OrgschemaMenuManageBlock = memo(
   (props: OrgschemaMenuManageBlockProps) => {
-    const { className, block } = props;
+    const { className } = props;
+
+    const { handleDeleteBlock, isDeletedPopoverOpen, setIsDeletedPopoverOpen } =
+      useOrgschemaMenuManage();
+
+    const selectedBlock = useOrgschemaMenu((state) => state.selectedBlock);
+
+    if (!selectedBlock) {
+      return (
+        <div className="flex flex-col items-center gap-4">
+          <OrgschemaSelectBlockBg className="text-primary" size={300} />
+          <h4
+            className={subtitle({
+              color: "default",
+            })}
+          >
+            Выберите активный блок
+          </h4>
+          <h4
+            className={subtitle({
+              size: "tiny",
+              align: "center",
+            })}
+          >
+            Выберите из списка блок, с которым хотите работать, или вы просто
+            кликните по нему на схеме организации.
+          </h4>
+        </div>
+      );
+    }
 
     return (
-      <div className="relative flex flex-col gap-2">
-        <Input
-          isReadOnly
-          label="Названиие блока"
-          placeholder="Введите название блока"
-          type="text"
-          value={block.name}
-        />
-        <div className="flex flex-row gap-2">
-          <Textarea
-            isReadOnly
-            endContent={
-              <Tooltip content="Копировать описание">
-                <Button isIconOnly color="primary" size="sm" variant="flat">
-                  <CopyIcon size={20} />
-                </Button>
-              </Tooltip>
-            }
-            label="Описание блока"
-            maxRows={3}
-            placeholder="Введите описание блока"
-            value={block.description}
-          />
-          <Textarea
-            isReadOnly
-            endContent={
-              <Tooltip
-                content="Копировать цкп"
-                isDisabled={block.description_secondary === ""}
-              >
-                <Button
-                  isIconOnly
-                  color={
-                    block.description_secondary === "" ? "default" : "primary"
-                  }
-                  isDisabled={block.description_secondary === ""}
-                  size="sm"
-                  variant="flat"
-                >
-                  <CopyIcon size={20} />
-                </Button>
-              </Tooltip>
-            }
-            label="ЦКП блока"
-            maxRows={3}
-            placeholder="Введите ЦКП блока"
-            value={block.description_secondary}
-          />
-        </div>
-        <div className="flex flex-row gap-2">
-          <Input
-            isReadOnly
-            endContent={
-              <Tooltip
-                content="Перейти по ссылке"
-                isDisabled={block.cloud === ""}
-              >
-                <Button
-                  isIconOnly
-                  color={block.cloud === "" ? "default" : "primary"}
-                  isDisabled={block.cloud === ""}
-                  size="sm"
-                  variant="flat"
-                >
-                  <LinkIcon />
-                </Button>
-              </Tooltip>
-            }
-            label="Ссылка на облако"
-            placeholder="Введите ссылку"
-            type="text"
-            value={block.cloud}
-          />
-          <Input
-            isReadOnly
-            endContent={
-              <Tooltip content="Перейти по ссылке">
-                <Button isIconOnly color="primary" size="sm" variant="flat">
-                  <LinkIcon />
-                </Button>
-              </Tooltip>
-            }
-            label="Ссылка на почту"
-            placeholder="Введите ссылку"
-            type="text"
-            value={block.mail}
-          />
-        </div>
+      <div className="relative flex flex-col h-full justify-between gap-2">
+        <div className="w-full flex flex-row gap-4 justify-between">
+          <Chip
+            className="w-full"
+            color="success"
+            startContent={<DateCrateIcon size={20} />}
+            variant="faded"
+          >
+            {getTimeDifferenceFromCreationDate(selectedBlock.created_at)}
+          </Chip>
 
-        <div className="flex flex-row gap-3 items-end justify-between">
+          <Chip
+            color="warning"
+            startContent={<DateEditIcon size={20} />}
+            variant="faded"
+          >
+            {getTimeDifferenceFromCreationDate(selectedBlock.updated_at)}
+          </Chip>
+        </div>
+        <div className="flex flex-none flex-row gap-3 items-end justify-between">
           <div className="flex flex-col gap-2">
             <p
               className={subtitle({
@@ -133,13 +102,13 @@ export const OrgschemaMenuManageBlock = memo(
             >
               Сотрудники:
             </p>
-            {block.employee.length === 0 ? (
-              <span className="text-danger font-semibold">
+            {selectedBlock.employee.length === 0 ? (
+              <span className="text-danger h-10 font-semibold">
                 Пусто... Нужно назначить!
               </span>
             ) : (
-              <AvatarGroup isBordered className="ml-4" max={2}>
-                {getUsersByEmployee(block.employee, UserListData).map(
+              <AvatarGroup isBordered className="ml-4" max={6}>
+                {getUsersByEmployee(selectedBlock.employee, UserListData).map(
                   (user) => (
                     <Tooltip
                       key={user.id}
@@ -167,23 +136,41 @@ export const OrgschemaMenuManageBlock = memo(
             </Button>
           </Tooltip>
         </div>
-        <div className="flex flex-row mt-5 h-44 w-full gap-2">
-          <Card isBlurred isPressable className="w-1/2 h-full">
-            <CardBody className="relative">
-              <span
-                className={subtitle({
-                  size: "tiny",
-                  color: "default",
-                })}
-              >
-                Редактировать
-              </span>
-              <EditIcon
-                className="absolute text-primary bottom-2 right-2"
-                size={70}
-              />
-            </CardBody>
-          </Card>
+        <div className="flex flex-none flex-row mt-5 h-44 w-full gap-2">
+          <div className="flex flex-col w-1/2  gap-2">
+            <Card isBlurred isPressable className="h-full w-full">
+              <CardBody className="relative">
+                <span
+                  className={subtitle({
+                    size: "tiny",
+                    color: "default",
+                  })}
+                >
+                  Редактировать
+                </span>
+                <EditIcon
+                  className="absolute text-primary bottom-2 right-2"
+                  size={30}
+                />
+              </CardBody>
+            </Card>
+            <Card isBlurred isPressable className="h-full w-full">
+              <CardBody className="relative">
+                <span
+                  className={subtitle({
+                    size: "tiny",
+                    color: "default",
+                  })}
+                >
+                  Создать блок
+                </span>
+                <AddIcon
+                  className="absolute text-primary bottom-2 right-2"
+                  size={30}
+                />
+              </CardBody>
+            </Card>
+          </div>
 
           <div className="flex flex-col w-full  gap-2">
             <div className="flex h-full flex-row gap-2">
@@ -237,22 +224,66 @@ export const OrgschemaMenuManageBlock = memo(
                   />
                 </CardBody>
               </Card>
-              <Card isBlurred isPressable className="h-full w-full">
-                <CardBody className="relative">
-                  <span
-                    className={subtitle({
-                      size: "tiny",
-                      color: "default",
-                    })}
-                  >
-                    Настройки
-                  </span>
-                  <SettingsIcon
-                    className="absolute text-primary bottom-2 right-2"
-                    size={30}
-                  />
-                </CardBody>
-              </Card>
+              <Popover
+                backdrop="opaque"
+                isOpen={isDeletedPopoverOpen}
+                onOpenChange={(open) => setIsDeletedPopoverOpen(open)}
+              >
+                <PopoverTrigger>
+                  <Card isBlurred isPressable className="h-full w-full">
+                    <CardBody className="relative">
+                      <span
+                        className={subtitle({
+                          size: "tiny",
+                          color: "default",
+                        })}
+                      >
+                        Удалить блок
+                      </span>
+                      <TrashIcon
+                        className="absolute text-danger bottom-2 right-2"
+                        size={30}
+                      />
+                    </CardBody>
+                  </Card>
+                </PopoverTrigger>
+                <PopoverContent className="flex flex-col gap-8 items-center p-4 max-w-96">
+                  <div className="flex flex-col text-center items-center w-full">
+                    <h5 className="text-danger font-bold text-2xl">
+                      Вы уверены?
+                    </h5>
+                    <p
+                      className={subtitle({
+                        size: "tiny",
+                        color: "default",
+                        align: "center",
+                      })}
+                    >
+                      Это действие удалит блок и все его содержимое без
+                      возможности востановить!
+                    </p>
+                  </div>
+
+                  <div className="flex flex-row gap-2 w-full">
+                    <Button
+                      fullWidth
+                      color="danger"
+                      startContent={<TrashIcon />}
+                      onClick={handleDeleteBlock}
+                    >
+                      Удалить
+                    </Button>
+                    <Button
+                      fullWidth
+                      color="default"
+                      variant="faded"
+                      onClick={() => setIsDeletedPopoverOpen(false)}
+                    >
+                      Отмена
+                    </Button>
+                  </div>
+                </PopoverContent>
+              </Popover>
             </div>
           </div>
         </div>

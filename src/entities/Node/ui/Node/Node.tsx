@@ -35,14 +35,20 @@ interface NodeProps {
 export const Node = memo((props: NodeProps) => {
   const { className, node } = props;
 
-  const selectedBlockId = useOrgschemaMenu((state) => state.selectedBlockId);
-  const setSelectedBlockId = useOrgschemaMenu(
-    (state) => state.setSelectedBlockId,
-  );
+  const selectedBlock = useOrgschemaMenu((state) => state.selectedBlock);
+  const setSelectedBlock = useOrgschemaMenu((state) => state.setSelectedBlock);
+
+  const handleSelectBlockById = (id: number) => {
+    if (id === selectedBlock?.id) {
+      setSelectedBlock(undefined);
+    } else {
+      setSelectedBlock(node);
+    }
+  };
 
   return (
     <Card
-      className={`relative bg-default-200 z-10 overflow-visible ${selectedBlockId === node.id ? "outline-4 outline-primary" : "outline-none"} h-auto w-96 pb-4 mb-2`}
+      className={`relative bg-default-200 z-10 overflow-visible ${selectedBlock?.id === node.id ? "outline-4 outline-primary" : "outline-none"} h-auto w-96 pb-4 mb-2`}
     >
       <CardBody className="flex flex-row justify-between gap-3">
         <div className="flex flex-col justify-between w-full gap-3">
@@ -50,7 +56,7 @@ export const Node = memo((props: NodeProps) => {
             <Card
               isPressable
               className="relative w-full z-10  gap-3"
-              onClick={() => setSelectedBlockId(node.id)}
+              onClick={() => handleSelectBlockById(node.id)}
             >
               <CardBody className="flex flex-col gap-2">
                 <h4
@@ -87,7 +93,7 @@ export const Node = memo((props: NodeProps) => {
                     Нужно назначить!
                   </span>
                 ) : (
-                  <AvatarGroup isBordered className="ml-4" max={2}>
+                  <AvatarGroup isBordered className="ml-4" max={5}>
                     {getUsersByEmployee(node.employee, UserListData).map(
                       (user) => (
                         <Tooltip
@@ -138,7 +144,7 @@ export const Node = memo((props: NodeProps) => {
           </Card>
         </div>
         <Card>
-          <CardBody className="flex flex-col gap-2 items-center justify-start overflow-hidden">
+          <CardBody className="flex flex-col gap-2 items-center justify-between overflow-hidden">
             <Tooltip content="Редактировать" placement="right">
               <Button isIconOnly color="primary" size="sm" variant="flat">
                 <EditIcon size={20} />
@@ -174,19 +180,25 @@ export const Node = memo((props: NodeProps) => {
       <CSSTransition
         unmountOnExit
         classNames="slide-animation"
-        in={selectedBlockId === node.id}
+        in={selectedBlock?.id === node.id}
         timeout={300}
       >
         <div className="absolute -bottom-4 right-[129px] flex flex-row gap-3">
-          <Button isIconOnly color="primary" radius="full" size="sm">
-            <AddIcon />
-          </Button>
-          <Button isIconOnly color="primary" radius="full" size="sm">
-            <EyeOpenedIcon />
-          </Button>
-          <Button isIconOnly color="primary" radius="full" size="sm">
-            <TreeClosedIcon />
-          </Button>
+          <Tooltip content="Добавить блок" placement="bottom">
+            <Button isIconOnly color="primary" radius="full" size="sm">
+              <AddIcon />
+            </Button>
+          </Tooltip>
+          <Tooltip content="Скрыть блоки" placement="bottom">
+            <Button isIconOnly color="primary" radius="full" size="sm">
+              <EyeOpenedIcon />
+            </Button>
+          </Tooltip>
+          <Tooltip content="Показать вертикально" placement="bottom">
+            <Button isIconOnly color="primary" radius="full" size="sm">
+              <TreeClosedIcon />
+            </Button>
+          </Tooltip>
         </div>
       </CSSTransition>
     </Card>

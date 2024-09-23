@@ -8,7 +8,9 @@ import { INode } from "@/src/entities/Node";
 
 export const useOrgschemaMenuManage = () => {
   const activeSchemaId = useOrgschemaMenu((state) => state.activeSchemaId);
+
   const loadedSchema = useOrgschemaMenu((state) => state.loadedSchema);
+
   // Получить все схемы
   const { data, isLoading, isError, error } = useQuery<INode[]>({
     queryKey: ["get all blocks by schema id", activeSchemaId],

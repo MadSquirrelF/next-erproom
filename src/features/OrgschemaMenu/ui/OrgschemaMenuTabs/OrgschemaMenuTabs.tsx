@@ -22,10 +22,12 @@ export const OrgschemaMenuTabs = memo((props: OrgschemaMenuTabsProps) => {
 
   const setStep = useOrgschemaMenu((state) => state.setStep);
   const currentStep = useOrgschemaMenu((state) => state.currentStep);
+  const setSelectedBlock = useOrgschemaMenu((state) => state.setSelectedBlock);
 
   const handleSelectionChange = (key: Key) => {
     const step = key as IOrgschemaMenuSteps;
 
+    setSelectedBlock(undefined);
     setStep(step);
   };
 

@@ -28,3 +28,18 @@ export interface INode {
   employee: INodeEmployee[];
   all_children_blocks: INode[] | [];
 }
+
+export interface INodeNoChildren extends Omit<INode, "all_children_blocks"> {}
+
+export interface INodeData {
+  id: number;
+  parent_id: number;
+  name: string;
+  description: string;
+  description_secondary: string;
+  cloud?: string;
+  mail?: string;
+  color?: string;
+  sort?: number;
+  is_together?: boolean;
+}

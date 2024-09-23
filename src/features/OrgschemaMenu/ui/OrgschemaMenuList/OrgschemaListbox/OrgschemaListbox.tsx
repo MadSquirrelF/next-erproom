@@ -1,8 +1,8 @@
 "use client";
 import { memo } from "react";
-import { Listbox, ListboxItem } from "@nextui-org/listbox";
 import { Skeleton } from "@nextui-org/skeleton";
 import { Button } from "@nextui-org/button";
+import { Autocomplete, AutocompleteItem } from "@nextui-org/autocomplete";
 
 import { useOrgschemaMenuListbox } from "../../../model/hooks/useOrgschemaMenuListbox";
 
@@ -13,28 +13,24 @@ interface OrgschemaListboxProps {
   className?: string;
 }
 
-const getSkeletonsSchemaList = () =>
-  new Array(7).fill(0).map((item, index) => (
-    <ListboxItem
-      key={index}
-      aria-label="Загрузка..."
-      startContent={<OrgSchemaIcon size={40} />}
-    >
-      <Skeleton className="rounded-lg h-7 w-full" />
-    </ListboxItem>
-  ));
-
 export const OrgschemaListbox = memo((props: OrgschemaListboxProps) => {
   const { className } = props;
 
-  const { data, isLoading, isError, error, handleSelectionChange } =
-    useOrgschemaMenuListbox();
+  const {
+    data,
+    isLoading,
+    isError,
+    error,
+    activeSchemaId,
+    handleSelectSchema,
+  } = useOrgschemaMenuListbox();
 
   if (isLoading) {
     return (
-      <Listbox aria-label="Зарузка" color="primary">
-        {getSkeletonsSchemaList()}
-      </Listbox>
+      <div className="flex flex-col gap-2">
+        <Skeleton className="rounded-lg h-3 w-1/3" />
+        <Skeleton className="rounded-lg h-12 w-full" />
+      </div>
     );
   }
 
@@ -74,23 +70,28 @@ export const OrgschemaListbox = memo((props: OrgschemaListboxProps) => {
   }
 
   return (
-    <Listbox
-      disallowEmptySelection
-      aria-label="orgschema list"
-      color="primary"
-      selectionMode="single"
-      variant="faded"
-      onSelectionChange={handleSelectionChange}
+    <Autocomplete
+      isClearable
+      isRequired
+      label="Выберите схему"
+      labelPlacement="outside"
+      placeholder="Выберите схему"
+      selectedKey={String(activeSchemaId)}
+      size="lg"
+      startContent={<OrgSchemaIcon className="text-primary" />}
+      onSelectionChange={handleSelectSchema}
     >
       {data.map((schema) => (
-        <ListboxItem
+        <AutocompleteItem
           key={schema.id}
-          aria-label={schema.name}
-          startContent={<OrgSchemaIcon size={40} />}
+          startContent={<OrgSchemaIcon />}
+          textValue={schema.name}
         >
-          <p className={subtitle()}>{schema.name}</p>
-        </ListboxItem>
+          <div className="flex flex-col">
+            <span>{schema.name}</span>
+          </div>
+        </AutocompleteItem>
       ))}
-    </Listbox>
+    </Autocomplete>
   );
 });
