@@ -4,6 +4,7 @@
   display: flex;
   justify-content: space-between;
   align-items: start;
+  
 
   &::before {
     content: "";
@@ -11,7 +12,8 @@
     height: 40px;
     left: 50%;
     top: -20px;
-    border-left: 5px solid #407BFF;
+    
+    @apply border-l-5 border-primary;
   }
 
 }
@@ -25,11 +27,8 @@
   padding: 20px 5px 0 5px;
   position: relative;
   z-index: 1;
-  transition: all 0.3s ease-in-out;
 
-  &:only-child {
-    padding-top: 0;
-  }
+  @apply transition-all;
 
   &::after,
   &::before {
@@ -37,19 +36,20 @@
     position: absolute;
     top: 0;
     right: 50%;
-    border-top: 5px solid #407BFF;
     width: 50%;
     height: 20px;
     z-index: -1;
+
+    @apply border-t-5 border-primary;
   }
 
   &::after {
     right: auto;
     left: 50%;
-    border-left: 5px solid #407BFF;
+
+    @apply border-l-5 border-primary;
   }
 
-  &:only-child::after,
   &:only-child::before {
     display: none;
   }
@@ -60,12 +60,80 @@
   }
 
   &:last-child::before {
-    border-right: 5px solid #407BFF;
     border-radius: 0 5px 0 0;
+
+    @apply border-r-5 border-primary;
   }
 
   &:first-child::after {
     border-radius: 5px 0 0 0;
   }
 
+  &:only-child::after {
+    border-left: 5px solid;
+    border-radius: 0;
+
+    @apply border-primary;
+  }
+
+}
+
+.vertical {
+  position: relative;
+  align-items: start;
+  
+  .item {
+    position: relative;
+    align-items: start;
+    padding: 0px 0px 20px 80px;
+
+      &::before {
+        position: absolute;
+        content: "";
+        left: 35px;
+        width: 5px;
+        transform: translateY(-40px);
+        height: 100%;
+        
+        @apply bg-primary;
+      }
+
+      &:last-child::before {
+        border-right: none 0;
+        border-radius: 0;
+      }
+
+      &::after {
+        position: absolute;
+        content: "";
+        top: 150px;
+        left: 35px;
+        width: 60px;
+        height: 5px;
+        
+        @apply bg-primary;
+        border-top: none 0;
+        border-radius: 0;
+      }
+
+      &:only-child::after,
+      &:only-child::before {
+        display: block;
+      }
+
+    
+  }
+
+ 
+
+  
+
+  .list {
+    display: flex;
+    flex-direction: column;
+
+    &::before {
+      display: none;
+    }
+  }
 }

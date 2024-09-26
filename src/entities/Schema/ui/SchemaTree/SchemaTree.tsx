@@ -13,6 +13,7 @@ export const SchemaTree = memo((props: SchemaTreeProps) => {
   const { className } = props;
 
   const loadedSchema = useOrgschemaMenu((state) => state.loadedSchema);
+  const zoomCount = useOrgschemaMenu((state) => state.zoomCount);
 
   if (!loadedSchema) {
     return (
@@ -49,7 +50,14 @@ export const SchemaTree = memo((props: SchemaTreeProps) => {
   }
 
   return (
-    <ul className="relative">
+    <ul
+      className="relative"
+      style={{
+        transform: `scale(${zoomCount})`,
+        transformOrigin: "top left",
+        transition: "transform 0.2s",
+      }}
+    >
       <SchemaBlock block={loadedSchema.blocks[0]} />
     </ul>
   );

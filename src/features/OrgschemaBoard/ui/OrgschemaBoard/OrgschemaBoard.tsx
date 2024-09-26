@@ -3,6 +3,12 @@
 import { memo, useCallback } from "react";
 import { CSSTransition, SwitchTransition } from "react-transition-group";
 import { Card, CardBody } from "@nextui-org/card";
+import { Popover, PopoverContent, PopoverTrigger } from "@nextui-org/popover";
+import { Button } from "@nextui-org/button";
+import { Tooltip } from "@nextui-org/tooltip";
+
+import { OrgschemaInfo } from "../OrgschemaInfo/OrgschemaInfo";
+import { OrgschemaZoom } from "../OrgschemaZoom/OrgschemaZoom";
 
 import {
   IOrgschemaMenuSection,
@@ -10,6 +16,7 @@ import {
 } from "@/src/features/OrgschemaMenu/model/store/orgschemaMenu";
 import { OrgschemaStart } from "@/src/features/OrgschemaStart/ui/OrgschemaStart";
 import { SchemaTree } from "@/src/entities/Schema/ui/SchemaTree/SchemaTree";
+import { InfoIcon, MenuIcon, ZoomInIcon } from "@/src/shared/assets/icons";
 
 interface OrgschemaBoardProps {
   className?: string;
@@ -19,10 +26,16 @@ export const OrgschemaBoard = memo((props: OrgschemaBoardProps) => {
   const { className } = props;
 
   const currentSection = useOrgschemaMenu((state) => state.currentSection);
-
+  const activeSchemaId = useOrgschemaMenu((state) => state.activeSchemaId);
+  const setIsMenuCollapsed = useOrgschemaMenu(
+    (state) => state.setIsMenuCollapsed,
+  );
+  const isMenuCollapsed = useOrgschemaMenu((state) => state.isMenuCollapsed);
   const loadedSchema = useOrgschemaMenu((state) => state.loadedSchema);
   const currentRoute = useOrgschemaMenu((state) => state.currentRoute);
-
+  const orgboardIsLoading = useOrgschemaMenu(
+    (state) => state.orgboardIsLoading,
+  );
   const renderBlock = useCallback(
     (currentSection: IOrgschemaMenuSection) => {
       switch (currentSection) {
@@ -71,8 +84,61 @@ export const OrgschemaBoard = memo((props: OrgschemaBoardProps) => {
   );
 
   return (
-    <Card className="overflow-x-auto overflow-y-auto w-full  relative h-full items-center">
-      <CardBody>
+    <Card className="overflow-x-auto overflow-y-auto w-full relative h-full items-center transition-all">
+      <CSSTransition
+        unmountOnExit
+        classNames="slide-animation"
+        in={loadedSchema !== undefined}
+        timeout={300}
+      >
+        <div className="absolute top-2 left-2">
+          <Popover showArrow offset={20} placement="bottom-start">
+            <PopoverTrigger>
+              <Button isIconOnly color="primary" size="lg" variant="light">
+                <InfoIcon size={40} />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="p-3">
+              <OrgschemaInfo />
+            </PopoverContent>
+          </Popover>
+        </div>
+      </CSSTransition>
+
+      <CSSTransition
+        unmountOnExit
+        classNames="slide-animation"
+        in={loadedSchema !== undefined}
+        timeout={300}
+      >
+        <div className="absolute top-2 right-20">
+          <Popover showArrow offset={20} placement="bottom-end">
+            <PopoverTrigger>
+              <Button isIconOnly color="primary" size="lg" variant="light">
+                <ZoomInIcon size={40} />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="p-3">
+              <OrgschemaZoom />
+            </PopoverContent>
+          </Popover>
+        </div>
+      </CSSTransition>
+
+      <Tooltip color="primary" content="Меню" placement="bottom">
+        <Button
+          isIconOnly
+          className="absolute top-2 z-30 right-4"
+          color="primary"
+          size="lg"
+          variant="light"
+          onClick={() => setIsMenuCollapsed(!isMenuCollapsed)}
+        >
+          <MenuIcon size={40} />
+        </Button>
+      </Tooltip>
+
+      <CardBody className="relative">
         <SwitchTransition mode="out-in">
           <CSSTransition
             key={currentSection}

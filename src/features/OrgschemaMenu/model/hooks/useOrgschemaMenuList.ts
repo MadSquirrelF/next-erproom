@@ -31,9 +31,8 @@ export const useOrgschemaMenuList = () => {
 
   const handleLoadSchemaById = async () => {
     try {
-      const result = await refetch(); // Ждем завершения запроса
+      const result = await refetch();
 
-      // Проверяем, успешен ли запрос
       if (result.isSuccess) {
         setStep(IOrgschemaMenuSteps.MANAGE);
 
@@ -45,11 +44,9 @@ export const useOrgschemaMenuList = () => {
 
         toast.success("Схема успешно загружена");
       } else {
-        // Если запрос не успешен, обрабатываем ошибку
         toast.error("Не удалось загрузить схему");
       }
     } catch (error) {
-      // Обработка ошибки при выполнении запроса
       toast.error("Ошибка запроса");
     }
   };

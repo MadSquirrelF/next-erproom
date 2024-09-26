@@ -2,6 +2,7 @@ import {
   IAllBlocksSchemasResponse,
   IAllSchemasResponse,
   ICreateBlockSchemasResponse,
+  ICreateSchemasResponse,
   ISchemasResponse,
   ISchemasResponseById,
 } from "../types/orgschema";
@@ -52,17 +53,78 @@ export const OrgschemaService = {
         sort: blockData?.sort,
         parent_id: blockData?.parent_id,
         is_together: blockData?.is_together,
-        color_block: blockData?.color,
+        color_block: blockData?.isColorClear ? "#f" : blockData?.color,
       },
     );
 
     return data.data.orgboard_block_id;
   },
 
-  //data add body
-  async updateBlock(schemaId?: number, blockId?: number) {
+  async createSchema(name?: string) {
+    const { data } = await axiosClassic.post<ICreateSchemasResponse>(
+      API_URL.orgschema(``),
+      {
+        name: name,
+      },
+    );
+
+    return data.data.orgboard_id;
+  },
+
+  async updateSchema(schemaId?: number, name?: string) {
+    const { data } = await axiosClassic.post<ISchemasResponse>(
+      API_URL.orgschema(`/${schemaId}`),
+      {
+        name: name,
+        _method: "PATCH",
+      },
+    );
+
+    return data;
+  },
+
+  async deleteSchema(schemaId?: number) {
+    const { data } = await axiosClassic.post<ISchemasResponse>(
+      API_URL.orgschema(`/${schemaId}`),
+      {
+        _method: "DELETE",
+      },
+    );
+
+    return data;
+  },
+
+  async updateBlock(
+    schemaId?: number,
+    blockId?: number,
+    blockData?: Partial<INodeData>,
+  ) {
     const { data } = await axiosClassic.post<ISchemasResponse>(
       API_URL.orgschema(`/${schemaId}/blocks/${blockId}`),
+      {
+        name: blockData?.name,
+        description: blockData?.description,
+        description_secondary: blockData?.description_secondary,
+        cloud: blockData?.cloud,
+        mail: blockData?.mail,
+        sort: blockData?.sort,
+        parent_id: blockData?.parent_id,
+        is_together: blockData?.is_together,
+        color_block: blockData?.isColorClear ? "#f" : blockData?.color,
+        _method: "PATCH",
+      },
+    );
+
+    return data;
+  },
+
+  async updateUsers(schemaId?: number, blockId?: number, users?: number[]) {
+    const { data } = await axiosClassic.post<ISchemasResponse>(
+      API_URL.orgschema(`/${schemaId}/blocks/${blockId}`),
+      {
+        employee: JSON.stringify(users),
+        _method: "PATCH",
+      },
     );
 
     return data;

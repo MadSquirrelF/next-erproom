@@ -12,14 +12,34 @@ export function getUsersByEmployee(employees: INodeEmployee[], users: IUser[]) {
     .flat();
 }
 
-export function returnUserColorStatus(
+export const getUserStatusColor = (
   status: UserStatus,
-): "danger" | "success" | "primary" {
-  if (status === UserStatus.HOSPITAL) {
-    return "danger";
-  } else if (status === UserStatus.VACATION) {
-    return "success";
+): "primary" | "danger" | "success" | "warning" => {
+  switch (status) {
+    case UserStatus.FREE:
+      return "primary";
+    case UserStatus.DISMISSED:
+      return "danger";
+    case UserStatus.HOSPITAL:
+      return "success";
+    case UserStatus.VACATION:
+      return "warning";
+    default:
+      return "warning";
   }
+};
 
-  return "primary";
-}
+export const getUserStatus = (status: UserStatus): string => {
+  switch (status) {
+    case UserStatus.FREE:
+      return "Свободен";
+    case UserStatus.DISMISSED:
+      return "Уволен";
+    case UserStatus.HOSPITAL:
+      return "Болеет";
+    case UserStatus.VACATION:
+      return "В отпуске";
+    default:
+      return "Свободен";
+  }
+};

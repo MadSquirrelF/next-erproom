@@ -13,6 +13,8 @@ export const loadStateFromLocalStorage = (): Pick<
   | "currentSection"
   | "currentStep"
   | "loadedSchema"
+  | "zoomCount"
+  | "isMenuCollapsed"
 > => {
   const savedState = localStorage.getItem(SCHEMA_MENU_LOCALSTORAGE_KEY);
   const result: IOrgschemaMenu = savedState ? JSON.parse(savedState) : {};
@@ -27,9 +29,11 @@ export const loadStateFromLocalStorage = (): Pick<
 
   return {
     currentStep: currentStep,
+    isMenuCollapsed: result.isMenuCollapsed || false,
     activeSchemaId: result.activeSchemaId,
     currentSection: result.currentSection || IOrgschemaMenuSection.NONE,
     loadedSchema: result.loadedSchema,
     currentRoute: result.currentRoute,
+    zoomCount: result.zoomCount || 1,
   };
 };

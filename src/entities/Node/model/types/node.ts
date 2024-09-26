@@ -41,5 +41,6 @@ export interface INodeData {
   mail?: string;
   color?: string;
   sort?: number;
-  is_together?: boolean;
+  is_together?: number;
+  isColorClear?: boolean;
 }

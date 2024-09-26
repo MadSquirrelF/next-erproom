@@ -3,36 +3,50 @@
 import { Button } from "@nextui-org/button";
 import { Input, Textarea } from "@nextui-org/input";
 import { Tooltip } from "@nextui-org/tooltip";
-import { ChangeEventHandler, memo } from "react";
+import { ChangeEventHandler, Key, memo, useEffect } from "react";
 import { Autocomplete, AutocompleteItem } from "@nextui-org/autocomplete";
 import { Switch } from "@nextui-org/switch";
-import { cn, Popover, PopoverContent, PopoverTrigger } from "@nextui-org/react";
+import { Popover, PopoverContent, PopoverTrigger } from "@nextui-org/react";
 import { HexColorPicker } from "react-colorful";
+import { isEqual } from "lodash";
+import toast from "react-hot-toast";
+import { CSSTransition } from "react-transition-group";
 
 import { useOrgschemaMenu } from "../../model/store/orgschemaMenu";
+import { useOrgschemaMenuManage } from "../../model/hooks/useOrgschemaMenuManage";
 
 import {
   AddIcon,
   ColorIcon,
   CopyIcon,
-  DocumentEmptyIcon,
+  DocsIcon,
   LinkIcon,
 } from "@/src/shared/assets/icons";
-import { INodeNoChildren } from "@/src/entities/Node/model/types/node";
+import {
+  INodeData,
+  INodeNoChildren,
+} from "@/src/entities/Node/model/types/node";
+import { title } from "@/components/primitives";
 
 interface BlockFormProps {
   className?: string;
+  cancelTitle: string;
+  handleTitle: string;
   isReadOnly?: boolean;
+  isPending: boolean;
+  type: string;
+  formTitle: string;
   data?: INodeNoChildren;
   cancel: () => void;
-  handleCreateBlock: () => void;
+  handleBlock: () => void;
   onChangeName?: ChangeEventHandler<HTMLInputElement>;
   onChangeDescription?: ChangeEventHandler<HTMLInputElement>;
   onChangeDescriptionSecondary?: ChangeEventHandler<HTMLInputElement>;
   onChangeMail?: ChangeEventHandler<HTMLInputElement>;
   onChangeCloud?: ChangeEventHandler<HTMLInputElement>;
-  onChangeParentBlock?: ChangeEventHandler<HTMLInputElement>;
+  onChangeParentBlock?: (id: Key | null) => void;
   onChangeIsTogether?: (isSelected: boolean) => void;
+  onClearColor?: (isSelected: boolean) => void;
   onChangeColor?: (newColor: string) => void;
   onChangeSort?: ChangeEventHandler<HTMLInputElement>;
 }
@@ -40,33 +54,142 @@ interface BlockFormProps {
 export const BlockForm = memo((props: BlockFormProps) => {
   const {
     className,
+    type,
+    isPending,
     isReadOnly,
     data,
+    formTitle,
+    cancelTitle,
+    handleTitle,
     cancel,
     onChangeName,
     onChangeDescription,
     onChangeDescriptionSecondary,
     onChangeMail,
     onChangeCloud,
+    onClearColor,
     onChangeParentBlock,
     onChangeIsTogether,
     onChangeColor,
     onChangeSort,
-    handleCreateBlock,
+    handleBlock,
   } = props;
 
-  const loadedSchema = useOrgschemaMenu((state) => state.loadedSchema);
   const blockForm = useOrgschemaMenu((state) => state.blockForm);
+  const setBlockForm = useOrgschemaMenu((state) => state.setBlockForm);
+  const selectedBlock = useOrgschemaMenu((state) => state.selectedBlock);
+  const { data: blocks } = useOrgschemaMenuManage();
+
+  const isParentBlockHidden =
+    !blocks ||
+    (type === "update" && selectedBlock?.parent_id === 0) ||
+    blocks.length < 2;
+
+  useEffect(() => {
+    if (selectedBlock && onChangeParentBlock) {
+      onChangeParentBlock(String(selectedBlock.id));
+    }
+  }, [selectedBlock]);
+
+  const newBlockForm: Partial<INodeData> = {
+    id: data?.id,
+    parent_id: data?.parent_id,
+    name: data?.name,
+    description: data?.description,
+    description_secondary: data?.description_secondary,
+    cloud: data?.cloud,
+    mail: data?.mail,
+    sort: data?.setting.sort,
+    color: data?.setting.color_block,
+    is_together: data?.setting.is_together ? 1 : 0,
+    isColorClear:
+      data?.setting.color_block === null || data?.setting.color_block === "#f"
+        ? true
+        : false,
+  };
+
+  useEffect(() => {
+    if (data) {
+      setBlockForm(newBlockForm);
+    }
+  }, [data]);
+
+  const handleOpenLink = (url: string | undefined) => {
+    if (url) {
+      window.open(url, "_blank");
+    }
+  };
+
+  const handleCopyText = (text: string | undefined) => {
+    if (text) {
+      navigator.clipboard.writeText(text);
+      toast.success("Текст скопирован!");
+    }
+  };
+
+  const validateEditForm = () => {
+    if (isEqual(blockForm, newBlockForm)) {
+      return false;
+    }
+
+    return true;
+  };
+
+  const validateCreateForm = () => {
+    if (
+      !blockForm?.name ||
+      !blockForm?.description ||
+      !blockForm?.description_secondary
+    ) {
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleForm = () => {
+    if (type === "update") {
+      const result = validateEditForm();
+
+      if (result) {
+        handleBlock();
+
+        return;
+      }
+
+      return toast.error("Блок не был изменен!");
+    } else if (type === "create") {
+      const result = validateCreateForm();
+
+      if (result) {
+        handleBlock();
+
+        return;
+      }
+
+      return toast.error("Введите обязательные поля!");
+    }
+  };
 
   return (
-    <form className="relative flex flex-col h-full gap-9 justify-between">
+    <form className="relative flex flex-col flex-grow gap-9 justify-between">
       <div className="w-full flex flex-col gap-4">
+        <h4
+          className={title({
+            size: "tiny",
+            bold: "bold",
+          })}
+        >
+          {formTitle}
+        </h4>
         <Input
           isReadOnly={isReadOnly}
+          isRequired={type === "create"}
           label="Названиие блока"
           placeholder="Введите название блока"
+          size="sm"
           type="text"
-          value={data?.name}
+          value={blockForm?.name}
           onChange={onChangeName}
         />
         <div className="flex flex-row gap-2">
@@ -75,19 +198,22 @@ export const BlockForm = memo((props: BlockFormProps) => {
               <Tooltip content="Копировать описание">
                 <Button
                   isIconOnly
-                  isDisabled={!data?.description}
+                  isDisabled={!blockForm?.description}
                   size="sm"
                   variant="flat"
+                  onClick={() => handleCopyText(blockForm?.description)}
                 >
                   <CopyIcon size={20} />
                 </Button>
               </Tooltip>
             }
             isReadOnly={isReadOnly}
+            isRequired={type === "create"}
             label="Описание блока"
             maxRows={3}
             placeholder="Введите описание блока"
-            value={data?.description}
+            size="sm"
+            value={blockForm?.description}
             onChange={onChangeDescription}
           />
           <Textarea
@@ -95,19 +221,24 @@ export const BlockForm = memo((props: BlockFormProps) => {
               <Tooltip content="Копировать цкп">
                 <Button
                   isIconOnly
-                  isDisabled={!data?.description_secondary}
+                  isDisabled={!blockForm?.description_secondary}
                   size="sm"
                   variant="flat"
+                  onClick={() =>
+                    handleCopyText(blockForm?.description_secondary)
+                  }
                 >
                   <CopyIcon size={20} />
                 </Button>
               </Tooltip>
             }
             isReadOnly={isReadOnly}
+            isRequired={type === "create"}
             label="ЦКП блока"
             maxRows={3}
             placeholder="Введите ЦКП блока"
-            value={data?.description_secondary}
+            size="sm"
+            value={blockForm?.description_secondary}
             onChange={onChangeDescriptionSecondary}
           />
         </div>
@@ -117,9 +248,10 @@ export const BlockForm = memo((props: BlockFormProps) => {
               <Tooltip content="Перейти по ссылке">
                 <Button
                   isIconOnly
-                  isDisabled={!data?.cloud}
+                  isDisabled={!blockForm?.cloud}
                   size="sm"
                   variant="flat"
+                  onClick={() => handleOpenLink(blockForm?.cloud)}
                 >
                   <LinkIcon />
                 </Button>
@@ -128,8 +260,9 @@ export const BlockForm = memo((props: BlockFormProps) => {
             isReadOnly={isReadOnly}
             label="Ссылка на облако"
             placeholder="Введите ссылку"
+            size="sm"
             type="text"
-            value={data?.cloud}
+            value={blockForm?.cloud}
             onChange={onChangeCloud}
           />
           <Input
@@ -137,9 +270,10 @@ export const BlockForm = memo((props: BlockFormProps) => {
               <Tooltip content="Перейти по ссылке">
                 <Button
                   isIconOnly
-                  isDisabled={!data?.mail}
+                  isDisabled={!blockForm?.mail}
                   size="sm"
                   variant="flat"
+                  onClick={() => handleOpenLink(blockForm?.mail)}
                 >
                   <LinkIcon />
                 </Button>
@@ -148,119 +282,113 @@ export const BlockForm = memo((props: BlockFormProps) => {
             isReadOnly={isReadOnly}
             label="Ссылка на почту"
             placeholder="Введите ссылку"
+            size="sm"
             type="text"
-            value={data?.mail}
+            value={blockForm?.mail}
             onChange={onChangeMail}
           />
         </div>
-        {loadedSchema!.blocks && loadedSchema?.blocks.length === 0 ? null : (
+        {isParentBlockHidden ? null : (
           <Autocomplete
             isClearable
-            label="Выберите родительский блок"
-            placeholder="Выберите блок схемы"
-            startContent={<DocumentEmptyIcon className="text-primary" />}
+            disabledKeys={type === "update" ? [String(selectedBlock?.id)] : []}
+            label="Родительский блок"
+            placeholder="Выберите родительский блок"
+            selectedKey={String(blockForm?.parent_id)}
+            size="sm"
+            onSelectionChange={onChangeParentBlock}
           >
-            <AutocompleteItem
-              key="Тест"
-              startContent={<DocumentEmptyIcon />}
-              textValue="Тест"
-            >
-              <div className="flex flex-col">
-                <span>Тест</span>
-              </div>
-            </AutocompleteItem>
+            {blocks ? (
+              blocks.map((block) => (
+                <AutocompleteItem
+                  key={block.id}
+                  startContent={<DocsIcon />}
+                  textValue={block.name}
+                >
+                  <div className="flex flex-col gap-1">
+                    <span>{block.name}</span>
+                  </div>
+                </AutocompleteItem>
+              ))
+            ) : (
+              <AutocompleteItem
+                key="Пусто"
+                startContent={<DocsIcon />}
+                value="Пусто"
+              >
+                <div className="flex flex-col gap-1">
+                  <span>Пусто</span>
+                </div>
+              </AutocompleteItem>
+            )}
           </Autocomplete>
         )}
-        <div className="flex flex-row w-full gap-2 items-start">
+        <div className="flex flex-row w-full gap-2 items-center">
           <Input
-            description="Число определяет порядок отображения блоков: чем меньше число, тем выше приоритет."
             isReadOnly={isReadOnly}
             label="Сортировка блока"
             placeholder="Введите цифру сортировки блока"
+            size="sm"
             type="number"
-            value={
-              data?.setting.sort === undefined
-                ? String(blockForm?.sort)
-                : String(data.setting.sort)
-            }
+            value={!blockForm?.sort ? "1" : String(blockForm.sort)}
             onChange={onChangeSort}
           />
 
-          <Popover>
-            <PopoverTrigger>
-              <Button isIconOnly className="mt-1" size="lg" variant="flat">
-                <ColorIcon
+          <CSSTransition
+            unmountOnExit
+            classNames="slide-animation"
+            in={!blockForm?.isColorClear}
+            timeout={300}
+          >
+            <Popover>
+              <PopoverTrigger>
+                <Button isIconOnly variant="flat">
+                  <ColorIcon
+                    color={
+                      !blockForm?.color || blockForm.color === "#f"
+                        ? "#DA2A2A"
+                        : blockForm.color
+                    }
+                    size={30}
+                  />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="flex flex-col items-center justify-center p-4">
+                <HexColorPicker
                   color={
-                    blockForm?.color === undefined ? "#DA2A2A" : blockForm.color
+                    !blockForm?.color || blockForm.color === "#f"
+                      ? "#DA2A2A"
+                      : blockForm.color
                   }
-                  size={30}
+                  onChange={onChangeColor}
                 />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="flex flex-col items-center justify-center p-4">
-              <HexColorPicker
-                color={data?.setting.color_block}
-                onChange={onChangeColor}
-              />
-            </PopoverContent>
-          </Popover>
+              </PopoverContent>
+            </Popover>
+          </CSSTransition>
         </div>
 
         <Switch
-          classNames={{
-            base: cn(
-              "inline-flex flex-row-reverse w-full max-w-md bg-content2 items-center",
-              "justify-between cursor-pointer rounded-xl gap-2 p-4 border-2 border-transparent",
-              "data-[selected=true]:border-primary",
-            ),
-            wrapper: "p-0 h-4 overflow-visible",
-            thumb: cn(
-              "w-6 h-6 border-2 shadow-lg",
-              "group-data-[hover=true]:border-primary",
-              //selected
-              "group-data-[selected=true]:ml-6",
-              // pressed
-              "group-data-[pressed=true]:w-7",
-              "group-data-[selected]:group-data-[pressed]:ml-4",
-            ),
-          }}
+          color="primary"
+          isSelected={blockForm?.is_together === 1}
+          size="sm"
           onValueChange={onChangeIsTogether}
         >
           <div className="flex flex-col gap-1">
-            <p className="text-medium">Вертикальное отображение блоков?</p>
-            <p className="text-tiny text-default-400">
-              Если вы выберете этот пункт, блоки под ним будут отображаться
-              вертикально.
-            </p>
+            <p className="text-medium">Вертикальное отображение блоков</p>
           </div>
         </Switch>
+
         <Switch
-          classNames={{
-            base: cn(
-              "inline-flex flex-row-reverse w-full max-w-md bg-content2 items-center",
-              "justify-between cursor-pointer rounded-xl gap-2 p-4 border-2 border-transparent",
-              "data-[selected=true]:border-primary",
-            ),
-            wrapper: "p-0 h-4 overflow-visible",
-            thumb: cn(
-              "w-6 h-6 border-2 shadow-lg",
-              "group-data-[hover=true]:border-primary",
-              //selected
-              "group-data-[selected=true]:ml-6",
-              // pressed
-              "group-data-[pressed=true]:w-7",
-              "group-data-[selected]:group-data-[pressed]:ml-4",
-            ),
-          }}
-          onValueChange={onChangeIsTogether}
+          color="primary"
+          isSelected={blockForm && blockForm.isColorClear === true}
+          size="sm"
+          onValueChange={onClearColor}
         >
           <div className="flex flex-col gap-1">
-            <p className="text-medium">Оставить блок без цвет?</p>
-            <p className="text-tiny text-default-400">
-              Если вы выберете этот пункт, данный блок будет без цвет.
-            </p>
+            <p className="text-medium">Без цвета</p>
           </div>
         </Switch>
+        {/* <p>{blockForm?.color}</p> */}
       </div>
 
       <div className="flex flex-col w-full gap-2">
@@ -271,16 +399,16 @@ export const BlockForm = memo((props: BlockFormProps) => {
           variant="faded"
           onClick={cancel}
         >
-          Отменить создание
+          {cancelTitle}
         </Button>
         <Button
           fullWidth
           color="primary"
           endContent={<AddIcon />}
           size="lg"
-          onClick={handleCreateBlock}
+          onClick={handleForm}
         >
-          Создать блок
+          {handleTitle}
         </Button>
       </div>
     </form>

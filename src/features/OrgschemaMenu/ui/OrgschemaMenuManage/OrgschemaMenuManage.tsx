@@ -1,13 +1,15 @@
+/* eslint-disable jsx-a11y/no-autofocus */
 "use client";
 /* eslint-disable react-hooks/rules-of-hooks */
-import { Key, memo, useCallback } from "react";
+import { ChangeEvent, Key, memo, useCallback } from "react";
 import { Button } from "@nextui-org/button";
 import { Tooltip } from "@nextui-org/tooltip";
 import { Skeleton } from "@nextui-org/skeleton";
 import { Input } from "@nextui-org/input";
 import { CSSTransition, SwitchTransition } from "react-transition-group";
 import { Autocomplete, AutocompleteItem } from "@nextui-org/autocomplete";
-import { ScrollShadow } from "@nextui-org/scroll-shadow";
+import toast from "react-hot-toast";
+import { Popover, PopoverContent, PopoverTrigger } from "@nextui-org/popover";
 
 import { useOrgschemaMenuManage } from "../../model/hooks/useOrgschemaMenuManage";
 import {
@@ -16,6 +18,7 @@ import {
 } from "../../model/store/orgschemaMenu";
 import { BlockForm } from "../BlockForm/BlockForm";
 import { useUpdateBlock } from "../../model/hooks/useUpdateBlock";
+import { useUpdateSchema } from "../../model/hooks/useUpdateSchema";
 
 import { OrgschemaMenuManageBlock } from "./OrgschemaMenuManageBlock/OrgschemaMenuManageBlock";
 
@@ -26,9 +29,10 @@ import {
   EyeOpenedIcon,
   GlobalRefreshIcon,
   OrgSchemaIcon,
+  TickIcon,
   TrashIcon,
 } from "@/src/shared/assets/icons";
-import { subtitle, title } from "@/components/primitives";
+import { subtitle } from "@/components/primitives";
 import { ErrorBg } from "@/src/shared/assets/ErrorBg/ErrorBg";
 import { EmptyData } from "@/src/shared/assets/EmptyData/EmptyData";
 
@@ -38,6 +42,18 @@ interface OrgschemaMenuManageProps {
 
 export const OrgschemaMenuManage = memo((props: OrgschemaMenuManageProps) => {
   const { className } = props;
+
+  const currentManageScreen = useOrgschemaMenu(
+    (state) => state.currentManageScreen,
+  );
+
+  const setManageScreen = useOrgschemaMenu((state) => state.setManageScreen);
+  const setSelectedBlock = useOrgschemaMenu((state) => state.setSelectedBlock);
+  const setSchemaInputValue = useOrgschemaMenu(
+    (state) => state.setSchemaInputValue,
+  );
+  const schemaInputValue = useOrgschemaMenu((state) => state.schemaInputValue);
+  const selectedBlock = useOrgschemaMenu((state) => state.selectedBlock);
 
   const { data, loadedSchema, isLoading, isError, error } =
     useOrgschemaMenuManage();
@@ -53,18 +69,46 @@ export const OrgschemaMenuManage = memo((props: OrgschemaMenuManageProps) => {
     onChangeSort,
     cancelUpdate,
     onChangeIsTogether,
+    onClearColor,
+    isPending,
   } = useUpdateBlock();
 
-  const currentManageScreen = useOrgschemaMenu(
-    (state) => state.currentManageScreen,
-  );
-
-  const setManageScreen = useOrgschemaMenu((state) => state.setManageScreen);
-  const setSelectedBlock = useOrgschemaMenu((state) => state.setSelectedBlock);
-  const selectedBlock = useOrgschemaMenu((state) => state.selectedBlock);
+  const {
+    isDeletedPopoverOpen,
+    setIsDeletedPopoverOpen,
+    handleDeleteSchema,
+    inputRef,
+    isSchemaInputReadonly,
+    handleBlurSchemaName,
+    updateSchema,
+    handleEditSchema,
+  } = useUpdateSchema();
 
   const handleCreateNewBlock = () => {
     setManageScreen(IManageScreen.CREATE);
+  };
+
+  const setEditInputActive = () => {
+    handleEditSchema();
+    setSchemaInputValue(loadedSchema?.name || "");
+  };
+
+  const handleUpdateSchema = () => {
+    if (!schemaInputValue || schemaInputValue === "") {
+      toast.error("Необходимо ввести название схемы");
+
+      return;
+    }
+    if (loadedSchema?.name === schemaInputValue) {
+      toast.error("Вы не обновили имя схемы.");
+
+      return;
+    }
+    updateSchema();
+  };
+
+  const onChangeInputSchema = (e: ChangeEvent<HTMLInputElement>) => {
+    setSchemaInputValue(e.target.value);
   };
 
   const handleSelectBlock = (blockId: Key | null) => {
@@ -131,21 +175,25 @@ export const OrgschemaMenuManage = memo((props: OrgschemaMenuManageProps) => {
 
         case IManageScreen.CREATE:
           return (
-            <ScrollShadow className="h-full w-full pr-2">
-              <BlockForm
-                cancel={cancelUpdate}
-                handleCreateBlock={createBlock}
-                isReadOnly={false}
-                onChangeCloud={onChangeCloud}
-                onChangeColor={onChangeColor}
-                onChangeDescription={onChangeDescription}
-                onChangeDescriptionSecondary={onChangeDescriptionSecondary}
-                onChangeIsTogether={onChangeIsTogether}
-                onChangeMail={onChangeMail}
-                onChangeName={onChangeName}
-                onChangeSort={onChangeSort}
-              />
-            </ScrollShadow>
+            <BlockForm
+              cancel={cancelUpdate}
+              cancelTitle="Отменить создание"
+              formTitle="Создание блока"
+              handleBlock={createBlock}
+              handleTitle="Создать блок"
+              isPending={isPending}
+              isReadOnly={false}
+              type="create"
+              onChangeCloud={onChangeCloud}
+              onChangeColor={onChangeColor}
+              onChangeDescription={onChangeDescription}
+              onChangeDescriptionSecondary={onChangeDescriptionSecondary}
+              onChangeIsTogether={onChangeIsTogether}
+              onChangeMail={onChangeMail}
+              onChangeName={onChangeName}
+              onChangeSort={onChangeSort}
+              onClearColor={onClearColor}
+            />
           );
 
         case IManageScreen.MANAGE:
@@ -170,8 +218,10 @@ export const OrgschemaMenuManage = memo((props: OrgschemaMenuManageProps) => {
                         textValue={block.name}
                       >
                         <div className="flex flex-col">
-                          <span>{block.name}</span>
-                          <span>{block.description}</span>
+                          <span className="font-bold">{block.name}</span>
+                          <span className="line-clamp-2 text-default-500">
+                            {block.description}
+                          </span>
                         </div>
                       </AutocompleteItem>
                     ))
@@ -234,6 +284,54 @@ export const OrgschemaMenuManage = memo((props: OrgschemaMenuManageProps) => {
     [currentManageScreen, selectedBlock, data],
   );
 
+  const renderEditButton = useCallback(
+    (isSchemaInputReadonly: boolean) => {
+      switch (isSchemaInputReadonly) {
+        case false:
+          return (
+            <Tooltip color="primary" content="Подтвердить?">
+              <Button
+                isIconOnly
+                color="primary"
+                id="confirmUpdateSchemaButton"
+                onClick={handleUpdateSchema}
+              >
+                <TickIcon />
+              </Button>
+            </Tooltip>
+          );
+        case true:
+          return (
+            <Tooltip content="Редактировать схему">
+              <Button
+                isIconOnly
+                color="primary"
+                variant="faded"
+                onClick={setEditInputActive}
+              >
+                <EditIcon />
+              </Button>
+            </Tooltip>
+          );
+
+        default:
+          return (
+            <Tooltip content="Редактировать схему">
+              <Button
+                isIconOnly
+                color="primary"
+                variant="faded"
+                onClick={setEditInputActive}
+              >
+                <EditIcon />
+              </Button>
+            </Tooltip>
+          );
+      }
+    },
+    [isSchemaInputReadonly, schemaInputValue],
+  );
+
   if (isLoading) {
     return (
       <form className="h-full flex flex-col justify-between">
@@ -260,29 +358,6 @@ export const OrgschemaMenuManage = memo((props: OrgschemaMenuManageProps) => {
   if (isError) {
     return (
       <form className="h-full flex flex-col gap-10">
-        <div className="w-full flex flex-row items-center justify-between">
-          <h5
-            className={title({
-              size: "tiny",
-              bold: "bold",
-            })}
-          >
-            {loadedSchema?.name}
-          </h5>
-
-          <div className="flex flex-row gap-2 items-center">
-            <Tooltip content="Редактировать схему">
-              <Button isIconOnly color="primary" variant="faded">
-                <EditIcon />
-              </Button>
-            </Tooltip>
-            <Tooltip color="danger" content="Удалить схему">
-              <Button isIconOnly color="danger" variant="faded">
-                <TrashIcon />
-              </Button>
-            </Tooltip>
-          </div>
-        </div>
         <div className="flex flex-col items-center gap-4">
           <ErrorBg className="text-danger" size={300} />
           <h4
@@ -309,28 +384,70 @@ export const OrgschemaMenuManage = memo((props: OrgschemaMenuManageProps) => {
   }
 
   return (
-    <div className="h-full flex flex-col z-10 justify-between gap-10">
+    <div className="h-full flex flex-col z-10 justify-between gap-5">
       <div className="w-full flex flex-row gap-6 items-end justify-between">
         <Input
-          isReadOnly
+          ref={inputRef}
+          isReadOnly={isSchemaInputReadonly}
           label="Название оргсхемы"
           labelPlacement="outside"
           startContent={<OrgSchemaIcon className="text-primary" />}
-          value={loadedSchema?.name}
+          value={isSchemaInputReadonly ? loadedSchema?.name : schemaInputValue}
           variant="underlined"
+          onBlur={handleBlurSchemaName}
+          onChange={onChangeInputSchema}
         />
 
         <div className="flex flex-row gap-2 items-center">
-          <Tooltip content="Редактировать схему">
-            <Button isIconOnly color="primary" variant="faded">
-              <EditIcon />
-            </Button>
-          </Tooltip>
-          <Tooltip color="danger" content="Удалить схему">
-            <Button isIconOnly color="danger" variant="faded">
-              <TrashIcon />
-            </Button>
-          </Tooltip>
+          {renderEditButton(isSchemaInputReadonly)}
+          <Popover
+            showArrow
+            backdrop="opaque"
+            isOpen={isDeletedPopoverOpen}
+            offset={20}
+            placement="bottom-end"
+            onOpenChange={(open) => setIsDeletedPopoverOpen(open)}
+          >
+            <PopoverTrigger>
+              <Button isIconOnly color="danger" variant="faded">
+                <TrashIcon />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="flex flex-col gap-8 items-center p-4 max-w-96">
+              <div className="flex flex-col text-center items-center w-full">
+                <h5 className="text-danger font-bold text-2xl">Вы уверены?</h5>
+                <p
+                  className={subtitle({
+                    size: "tiny",
+                    color: "default",
+                    align: "center",
+                  })}
+                >
+                  Это действие удалит cхему и все его содержимые блоки без
+                  возможности востановить!
+                </p>
+              </div>
+
+              <div className="flex flex-row gap-2 w-full">
+                <Button
+                  fullWidth
+                  color="danger"
+                  startContent={<TrashIcon />}
+                  onClick={handleDeleteSchema}
+                >
+                  Удалить
+                </Button>
+                <Button
+                  fullWidth
+                  color="default"
+                  variant="faded"
+                  onClick={() => setIsDeletedPopoverOpen(false)}
+                >
+                  Отмена
+                </Button>
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
       </div>
 

@@ -1,9 +1,15 @@
 "use client";
 import { Button } from "@nextui-org/button";
-import { memo } from "react";
+import { ChangeEvent, memo, useCallback } from "react";
+import { Input } from "@nextui-org/input";
+import { CSSTransition, SwitchTransition } from "react-transition-group";
 
-import { IOrgschemaMenuSection } from "../../model/store/orgschemaMenu";
+import {
+  IOrgschemaMenuSection,
+  useOrgschemaMenu,
+} from "../../model/store/orgschemaMenu";
 import { useOrgschemaMenuList } from "../../model/hooks/useOrgschemaMenuList";
+import { useUpdateSchema } from "../../model/hooks/useUpdateSchema";
 
 import { OrgschemaListbox } from "./OrgschemaListbox/OrgschemaListbox";
 
@@ -19,37 +25,139 @@ export const OrgschemaMenuList = memo((props: OrgschemaMenuListProps) => {
   const { currentSection, handleLoadSchemaById, isLoading, activeSchemaId } =
     useOrgschemaMenuList();
 
+  const setSchemaInputValue = useOrgschemaMenu(
+    (state) => state.setSchemaInputValue,
+  );
+
+  const onChangeInput = (e: ChangeEvent<HTMLInputElement>) => {
+    setSchemaInputValue(e.currentTarget.value);
+  };
+
+  const schemaInputValue = useOrgschemaMenu((state) => state.schemaInputValue);
+
+  const {
+    isCreatePopoverOpen,
+    handleSetIsCreatePopoverOpen,
+    handleSetIsCreatePopoverClose,
+    handleCreateSchema,
+  } = useUpdateSchema();
+
+  const renderActions = useCallback(
+    (isCreatePopoverOpen: boolean) => {
+      switch (isCreatePopoverOpen) {
+        case true:
+          return (
+            <form className="flex flex-col gap-2" onSubmit={handleCreateSchema}>
+              <Input
+                isRequired
+                label="Введите название схемы"
+                size="lg"
+                value={schemaInputValue}
+                onChange={onChangeInput}
+              />
+
+              <div className="flex flex-row w-full gap-2">
+                <Button
+                  fullWidth
+                  color="danger"
+                  size="lg"
+                  variant="faded"
+                  onClick={handleSetIsCreatePopoverClose}
+                >
+                  Отменить
+                </Button>
+                <Button
+                  fullWidth
+                  color="primary"
+                  endContent={<AddIcon />}
+                  isDisabled={!schemaInputValue}
+                  size="lg"
+                  type="submit"
+                >
+                  Создать схему
+                </Button>
+              </div>
+            </form>
+          );
+
+        case false:
+          return (
+            <div className="flex flex-col gap-2">
+              <Button
+                color="primary"
+                endContent={<AddIcon size={30} />}
+                size="lg"
+                variant="faded"
+                onClick={handleSetIsCreatePopoverOpen}
+              >
+                {currentSection === IOrgschemaMenuSection.SCHEMAS
+                  ? "Создать новую схему"
+                  : "Создать новый маршрут"}
+              </Button>
+              <Button
+                color="primary"
+                endContent={<CloudActionIcon size={30} />}
+                isDisabled={!activeSchemaId}
+                isLoading={isLoading}
+                size="lg"
+                onClick={handleLoadSchemaById}
+              >
+                {currentSection === IOrgschemaMenuSection.SCHEMAS
+                  ? "Загрузить схему"
+                  : "Загрузить маршрут"}
+              </Button>
+            </div>
+          );
+
+        default:
+          return (
+            <div className="flex flex-col gap-2">
+              <Button
+                color="primary"
+                endContent={<AddIcon size={30} />}
+                size="lg"
+                variant="faded"
+                onClick={handleSetIsCreatePopoverOpen}
+              >
+                {currentSection === IOrgschemaMenuSection.SCHEMAS
+                  ? "Создать новую схему"
+                  : "Создать новый маршрут"}
+              </Button>
+              <Button
+                color="primary"
+                endContent={<CloudActionIcon size={30} />}
+                isDisabled={!activeSchemaId}
+                isLoading={isLoading}
+                size="lg"
+                onClick={handleLoadSchemaById}
+              >
+                {currentSection === IOrgschemaMenuSection.SCHEMAS
+                  ? "Загрузить схему"
+                  : "Загрузить маршрут"}
+              </Button>
+            </div>
+          );
+      }
+    },
+    [isCreatePopoverOpen, schemaInputValue, activeSchemaId, isLoading],
+  );
+
   return (
-    <form className="h-full flex flex-col justify-between">
+    <form className="flex flex-col flex-grow justify-between">
       <div className="flex flex-col gap-6">
         <OrgschemaListbox />
       </div>
 
-      <div className="flex flex-col gap-2">
-        <Button
-          color="primary"
-          endContent={<AddIcon size={30} />}
-          size="lg"
-          variant="faded"
+      <SwitchTransition mode="out-in">
+        <CSSTransition
+          key={isCreatePopoverOpen ? "form" : "buttons"}
+          unmountOnExit
+          classNames="fade"
+          timeout={300}
         >
-          {currentSection === IOrgschemaMenuSection.SCHEMAS
-            ? "Создать новую схему"
-            : "Создать новый маршрут"}
-        </Button>
-
-        <Button
-          color="primary"
-          endContent={<CloudActionIcon size={30} />}
-          isDisabled={!activeSchemaId}
-          isLoading={isLoading}
-          size="lg"
-          onClick={handleLoadSchemaById}
-        >
-          {currentSection === IOrgschemaMenuSection.SCHEMAS
-            ? "Загрузить схему"
-            : "Загрузить маршрут"}
-        </Button>
-      </div>
+          {renderActions(isCreatePopoverOpen)}
+        </CSSTransition>
+      </SwitchTransition>
     </form>
   );
 });

@@ -6,7 +6,7 @@ import { Providers } from "./providers";
 
 import { siteConfig } from "@/src/shared/config/site";
 import { fontSans } from "@/src/shared/config/fonts";
-import { Sidebar } from "@/src/widgets/Sidebar/Sidebar";
+import { Sidebar } from "@/src/widgets/Sidebar/ui/Sidebar";
 
 export const metadata: Metadata = {
   title: {
@@ -43,9 +43,7 @@ export default function RootLayout({
         <Providers themeProps={{ attribute: "class", defaultTheme: "light" }}>
           <div className="relative flex flex-row h-screen w-full">
             <Sidebar />
-            <main className="relative h-full flex-grow w-[calc(100vw-80px)]">
-              {children}
-            </main>
+            <main className="relative h-full flex-grow w-full">{children}</main>
           </div>
         </Providers>
       </body>

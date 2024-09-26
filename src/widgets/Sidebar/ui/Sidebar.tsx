@@ -1,9 +1,10 @@
 "use client";
 
-import { memo, useMemo, useState } from "react";
+import { memo, useMemo } from "react";
 import { Button } from "@nextui-org/button";
 
-import { SidebarItem } from "./SidebarItem/ui/SidebarItem";
+import { SidebarItem } from "../SidebarItem/ui/SidebarItem";
+import { useSidebarstore } from "../model/store/useSidebarstore";
 
 import { siteConfig } from "@/src/shared/config/site";
 import {
@@ -18,21 +19,29 @@ interface SidebarProps {
 }
 
 export const Sidebar = memo((props: SidebarProps) => {
-  const [collapsed, setCollapsed] = useState(true);
+  const isSidebarCollapsed = useSidebarstore(
+    (state) => state.isSidebarCollapsed,
+  );
 
-  const toggleSidebar = () => setCollapsed(!collapsed);
+  const setIsSidebarCollapsed = useSidebarstore(
+    (state) => state.setIsSidebarCollapsed,
+  );
 
   const itemsList = useMemo(
     () =>
       siteConfig.navItems.map((item) => (
-        <SidebarItem key={item.href} collapsed={collapsed} item={item} />
+        <SidebarItem
+          key={item.href}
+          collapsed={isSidebarCollapsed}
+          item={item}
+        />
       )),
-    [collapsed],
+    [isSidebarCollapsed],
   );
 
   return (
     <aside
-      className={`h-full ${collapsed ? "w-20" : "w-[300px]"} border-r-1 border-default shadow-default shadow-medium py-6 px-2 relative transition-all duration-300`}
+      className={`h-full "w-20" border-r-1 border-default shadow-default shadow-medium py-6 px-2 relative transition-all duration-300`}
     >
       <p className="font-bold text-2xl text-primary">TMP</p>
 
@@ -43,12 +52,14 @@ export const Sidebar = memo((props: SidebarProps) => {
           fullWidth
           className="mb-5"
           color="danger"
-          isIconOnly={collapsed}
+          isIconOnly={isSidebarCollapsed}
           size="lg"
           startContent={<LogoutIcon size={24} />}
           variant="faded"
         >
-          <p className={`font-semibold  ${collapsed ? "hidden" : "flex"}`}>
+          <p
+            className={`font-semibold  ${isSidebarCollapsed ? "hidden" : "flex"}`}
+          >
             Выйти
           </p>
         </Button>
@@ -58,9 +69,9 @@ export const Sidebar = memo((props: SidebarProps) => {
         isIconOnly
         className="absolute text-primary bottom-4 right-2"
         variant="faded"
-        onClick={toggleSidebar}
+        onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
       >
-        {collapsed ? <ArrowRightIcon /> : <ArrowLeftIcon />}
+        {isSidebarCollapsed ? <ArrowRightIcon /> : <ArrowLeftIcon />}
       </Button>
     </aside>
   );
