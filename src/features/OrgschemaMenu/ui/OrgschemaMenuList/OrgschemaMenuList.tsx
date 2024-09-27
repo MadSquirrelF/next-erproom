@@ -47,7 +47,7 @@ export const OrgschemaMenuList = memo((props: OrgschemaMenuListProps) => {
       switch (isCreatePopoverOpen) {
         case true:
           return (
-            <form className="flex flex-col gap-2" onSubmit={handleCreateSchema}>
+            <form className="flex flex-col gap-2">
               <Input
                 isRequired
                 label="Введите название схемы"
@@ -72,7 +72,7 @@ export const OrgschemaMenuList = memo((props: OrgschemaMenuListProps) => {
                   endContent={<AddIcon />}
                   isDisabled={!schemaInputValue}
                   size="lg"
-                  type="submit"
+                  onClick={handleCreateSchema}
                 >
                   Создать схему
                 </Button>

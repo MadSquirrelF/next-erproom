@@ -1,14 +1,7 @@
 "use client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
-import {
-  FocusEvent,
-  FormEvent,
-  useCallback,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { FocusEvent, useCallback, useMemo, useRef, useState } from "react";
 
 import { OrgschemaService } from "../services/orgschema";
 import { IOrgschemaMenuSteps, useOrgschemaMenu } from "../store/orgschemaMenu";
@@ -120,7 +113,7 @@ export const useUpdateSchema = () => {
     deleteSchema();
   };
 
-  const handleCreateSchema = (event: FormEvent<HTMLFormElement>) => {
+  const handleCreateSchema = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
     createSchema();
   };
