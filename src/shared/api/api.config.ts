@@ -6,7 +6,7 @@ export const SERVER_URL = `${__API__}`;
 
 export const API_URL = {
   root: (url = "") => `${url ? url : ""}`,
-  orgschema: (url = "") => API_URL.root(`orgboards/schemes${url}`),
+  orgschema: (url = "") => API_URL.root(`orgboard/schemes${url}`),
 };
 
 const options: CreateAxiosDefaults = {
