@@ -416,7 +416,6 @@ export const DateEditIcon: React.FC<IconSvgProps> = ({
   size = 24,
   width,
   height,
-  color,
   ...props
 }) => {
   return (

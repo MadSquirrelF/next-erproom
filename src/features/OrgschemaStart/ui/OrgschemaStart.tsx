@@ -17,7 +17,7 @@ interface OrgschemaStartProps {
 }
 
 export const OrgschemaStart = memo((props: OrgschemaStartProps) => {
-  const { className, background, titleText, description } = props;
+  const { background, titleText, description } = props;
 
   const renderBackground = useCallback((background: IOrgschemaMenuSection) => {
     switch (background) {

@@ -1,3 +1,4 @@
+"use client";
 import { Checkbox } from "@nextui-org/checkbox";
 import { memo } from "react";
 import { Chip, cn } from "@nextui-org/react";
@@ -16,7 +17,7 @@ interface UserItemProps {
 }
 
 export const UserItem = memo((props: UserItemProps) => {
-  const { className, user } = props;
+  const { user } = props;
 
   return (
     <Checkbox

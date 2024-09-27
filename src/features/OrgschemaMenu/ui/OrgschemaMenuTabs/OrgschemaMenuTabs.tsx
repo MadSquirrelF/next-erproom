@@ -10,13 +10,7 @@ import {
 
 import { ConvertCubeIcon, EditIcon, NoteIcon } from "@/src/shared/assets/icons";
 
-interface OrgschemaMenuTabsProps {
-  className?: string;
-}
-
-export const OrgschemaMenuTabs = memo((props: OrgschemaMenuTabsProps) => {
-  const { className } = props;
-
+export const OrgschemaMenuTabs = memo(() => {
   const currentSection = useOrgschemaMenu((state) => state.currentSection);
   const loadedSchema = useOrgschemaMenu((state) => state.loadedSchema);
 

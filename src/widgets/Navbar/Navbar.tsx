@@ -8,13 +8,7 @@ import { Button } from "@nextui-org/button";
 
 import { ThemeSwitch } from "@/components/theme-switch";
 
-interface NavbarProps {
-  className?: string;
-}
-
-export const Navbar = memo((props: NavbarProps) => {
-  const { className } = props;
-
+export const Navbar = memo(() => {
   return (
     <NextUINavbar shouldHideOnScroll maxWidth="full" position="sticky">
       <NavbarContent

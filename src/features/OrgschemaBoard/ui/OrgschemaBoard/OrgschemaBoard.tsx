@@ -18,24 +18,15 @@ import { OrgschemaStart } from "@/src/features/OrgschemaStart/ui/OrgschemaStart"
 import { SchemaTree } from "@/src/entities/Schema/ui/SchemaTree/SchemaTree";
 import { InfoIcon, MenuIcon, ZoomInIcon } from "@/src/shared/assets/icons";
 
-interface OrgschemaBoardProps {
-  className?: string;
-}
-
-export const OrgschemaBoard = memo((props: OrgschemaBoardProps) => {
-  const { className } = props;
-
+export const OrgschemaBoard = memo(() => {
   const currentSection = useOrgschemaMenu((state) => state.currentSection);
-  const activeSchemaId = useOrgschemaMenu((state) => state.activeSchemaId);
   const setIsMenuCollapsed = useOrgschemaMenu(
     (state) => state.setIsMenuCollapsed,
   );
   const isMenuCollapsed = useOrgschemaMenu((state) => state.isMenuCollapsed);
   const loadedSchema = useOrgschemaMenu((state) => state.loadedSchema);
   const currentRoute = useOrgschemaMenu((state) => state.currentRoute);
-  const orgboardIsLoading = useOrgschemaMenu(
-    (state) => state.orgboardIsLoading,
-  );
+
   const renderBlock = useCallback(
     (currentSection: IOrgschemaMenuSection) => {
       switch (currentSection) {

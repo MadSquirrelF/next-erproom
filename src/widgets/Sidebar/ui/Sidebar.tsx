@@ -14,11 +14,7 @@ import {
 } from "@/src/shared/assets/icons";
 import { ThemeSwitch } from "@/components/theme-switch";
 
-interface SidebarProps {
-  className?: string;
-}
-
-export const Sidebar = memo((props: SidebarProps) => {
+export const Sidebar = memo(() => {
   const isSidebarCollapsed = useSidebarstore(
     (state) => state.isSidebarCollapsed,
   );

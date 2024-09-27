@@ -1,4 +1,3 @@
-/* eslint-disable jsx-a11y/no-autofocus */
 "use client";
 /* eslint-disable react-hooks/rules-of-hooks */
 import { ChangeEvent, Key, memo, useCallback } from "react";

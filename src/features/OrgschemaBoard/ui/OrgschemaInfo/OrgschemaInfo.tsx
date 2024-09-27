@@ -1,3 +1,4 @@
+"use client";
 import { Chip } from "@nextui-org/chip";
 import { memo } from "react";
 import { Tooltip } from "@nextui-org/tooltip";

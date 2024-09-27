@@ -14,13 +14,7 @@ import { ArrowRightIcon } from "@/src/shared/assets/icons";
 import { OrgschemaStartBg } from "@/src/shared/assets/OrgschemaStartBg/OrgschemaStartBg";
 import { RoutesStartBg } from "@/src/shared/assets/RoutesStartBg/RoutesStartBg";
 
-interface OrgschemaMenuSectionProps {
-  className?: string;
-}
-
-export const OrgschemaMenuSection = memo((props: OrgschemaMenuSectionProps) => {
-  const { className } = props;
-
+export const OrgschemaMenuSection = memo(() => {
   const setStep = useOrgschemaMenu((state) => state.setStep);
   const currentSection = useOrgschemaMenu((state) => state.currentSection);
 

@@ -15,7 +15,7 @@ interface UsersListProps {
 }
 
 export const UsersList = memo((props: UsersListProps) => {
-  const { className, selectedUsers, onChangeSelectedUsers } = props;
+  const { selectedUsers, onChangeSelectedUsers } = props;
 
   return (
     <CheckboxGroup
