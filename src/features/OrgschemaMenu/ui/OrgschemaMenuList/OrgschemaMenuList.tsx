@@ -4,16 +4,12 @@ import { ChangeEvent, memo, useCallback } from "react";
 import { Input } from "@nextui-org/input";
 import { CSSTransition, SwitchTransition } from "react-transition-group";
 
-import {
-  IOrgschemaMenuSection,
-  useOrgschemaMenu,
-} from "../../model/store/orgschemaMenu";
-import { useOrgschemaMenuList } from "../../model/hooks/useOrgschemaMenuList";
+import { useOrgschemaMenu } from "../../model/store/orgschemaMenu";
 import { useUpdateSchema } from "../../model/hooks/useUpdateSchema";
 
 import { OrgschemaListbox } from "./OrgschemaListbox/OrgschemaListbox";
 
-import { AddIcon, CloudActionIcon } from "@/src/shared/assets/icons";
+import { AddIcon } from "@/src/shared/assets/icons";
 
 interface OrgschemaMenuListProps {
   className?: string;
@@ -21,9 +17,6 @@ interface OrgschemaMenuListProps {
 
 export const OrgschemaMenuList = memo((props: OrgschemaMenuListProps) => {
   const { className } = props;
-
-  const { currentSection, handleLoadSchemaById, isLoading, activeSchemaId } =
-    useOrgschemaMenuList();
 
   const setSchemaInputValue = useOrgschemaMenu(
     (state) => state.setSchemaInputValue,
@@ -47,7 +40,7 @@ export const OrgschemaMenuList = memo((props: OrgschemaMenuListProps) => {
       switch (isCreatePopoverOpen) {
         case true:
           return (
-            <form className="flex flex-col gap-2">
+            <form className="flex flex-col gap-2" onSubmit={handleCreateSchema}>
               <Input
                 isRequired
                 label="Введите название схемы"
@@ -72,7 +65,7 @@ export const OrgschemaMenuList = memo((props: OrgschemaMenuListProps) => {
                   endContent={<AddIcon />}
                   isDisabled={!schemaInputValue}
                   size="lg"
-                  onClick={handleCreateSchema}
+                  type="submit"
                 >
                   Создать схему
                 </Button>
@@ -90,21 +83,7 @@ export const OrgschemaMenuList = memo((props: OrgschemaMenuListProps) => {
                 variant="faded"
                 onClick={handleSetIsCreatePopoverOpen}
               >
-                {currentSection === IOrgschemaMenuSection.SCHEMAS
-                  ? "Создать новую схему"
-                  : "Создать новый маршрут"}
-              </Button>
-              <Button
-                color="primary"
-                endContent={<CloudActionIcon size={30} />}
-                isDisabled={!activeSchemaId}
-                isLoading={isLoading}
-                size="lg"
-                onClick={handleLoadSchemaById}
-              >
-                {currentSection === IOrgschemaMenuSection.SCHEMAS
-                  ? "Загрузить схему"
-                  : "Загрузить маршрут"}
+                Создать новую схему
               </Button>
             </div>
           );
@@ -119,31 +98,17 @@ export const OrgschemaMenuList = memo((props: OrgschemaMenuListProps) => {
                 variant="faded"
                 onClick={handleSetIsCreatePopoverOpen}
               >
-                {currentSection === IOrgschemaMenuSection.SCHEMAS
-                  ? "Создать новую схему"
-                  : "Создать новый маршрут"}
-              </Button>
-              <Button
-                color="primary"
-                endContent={<CloudActionIcon size={30} />}
-                isDisabled={!activeSchemaId}
-                isLoading={isLoading}
-                size="lg"
-                onClick={handleLoadSchemaById}
-              >
-                {currentSection === IOrgschemaMenuSection.SCHEMAS
-                  ? "Загрузить схему"
-                  : "Загрузить маршрут"}
+                Создать новую схему
               </Button>
             </div>
           );
       }
     },
-    [isCreatePopoverOpen, schemaInputValue, activeSchemaId, isLoading],
+    [isCreatePopoverOpen, schemaInputValue],
   );
 
   return (
-    <form className="flex flex-col flex-grow justify-between">
+    <div className="flex flex-col flex-grow justify-between">
       <div className="flex flex-col gap-6">
         <OrgschemaListbox />
       </div>
@@ -158,6 +123,6 @@ export const OrgschemaMenuList = memo((props: OrgschemaMenuListProps) => {
           {renderActions(isCreatePopoverOpen)}
         </CSSTransition>
       </SwitchTransition>
-    </form>
+    </div>
   );
 });

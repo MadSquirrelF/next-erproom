@@ -21,6 +21,10 @@ export interface ISchemaId {
   orgboard_id: number;
 }
 
+export interface ISchemaIdSecondary {
+  scheme_id: number;
+}
+
 export interface ISchemasResponse {
   success: boolean;
   statusCode: number;
@@ -44,5 +48,5 @@ export interface ICreateBlockSchemasResponse extends ISchemasResponse {
 }
 
 export interface ICreateSchemasResponse extends ISchemasResponse {
-  data: ISchemaId;
+  data: ISchemaIdSecondary;
 }

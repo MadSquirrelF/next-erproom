@@ -1,18 +1,18 @@
-"use client";
-import { Checkbox } from "@nextui-org/checkbox";
 import { memo } from "react";
+import { Checkbox } from "@nextui-org/checkbox";
 import { Chip, cn } from "@nextui-org/react";
 import { User } from "@nextui-org/user";
 import { Link } from "@nextui-org/link";
 
-import { IUser } from "@/src/features/OrgschemaMenu/model/data/data";
+import { IUser } from "../../../model/types/user";
+
 import {
-  getUserStatus,
-  getUserStatusColor,
+  formatFullName,
+  getStatusColor,
+  getStatusText,
 } from "@/src/shared/utils/userFunctions/userFunctions";
 
 interface UserItemProps {
-  className?: string;
   user: IUser;
 }
 
@@ -21,10 +21,10 @@ export const UserItem = memo((props: UserItemProps) => {
 
   return (
     <Checkbox
-      aria-label={user.fullName}
+      aria-label={formatFullName(user.name, user.middlename, user.lastname)}
       classNames={{
         base: cn(
-          "inline-flex max-w-md w-full bg-content1 m-0",
+          "inline-flex w-full max-w-full bg-content1 m-0",
           "hover:bg-content2 items-center justify-start",
           "cursor-pointer rounded-lg gap-2 p-4 border-2 border-transparent",
           "data-[selected=true]:border-primary",
@@ -37,28 +37,30 @@ export const UserItem = memo((props: UserItemProps) => {
         <User
           avatarProps={{
             size: "md",
-            src: user.avatarPath,
-            isBordered: true,
-            color: getUserStatusColor(user.status),
+            color: getStatusColor(user.status, user.vacation, user.disease),
+            src: user.avatar || "",
+            name: user.name || "",
+            className: "flex-none",
           }}
           classNames={{
-            name: "line-clamp-1",
+            name: "line-clamp-1 max-w-32",
+            description: "line-clamp-1 max-w-32",
           }}
           description={
-            <Link isExternal href={user.email} size="sm">
+            <Link isExternal href={user.email || ""} size="sm">
               @{user.email}
             </Link>
           }
-          name={user.fullName}
+          name={formatFullName(user.name, user.middlename, user.lastname)}
         />
         <div className="flex flex-col items-end gap-1">
-          <span className="text-tiny text-default-500">{user.position}</span>
+          <span className="text-tiny text-default-500">{user.status}</span>
           <Chip
-            color={getUserStatusColor(user.status)}
+            color={getStatusColor(user.status, user.vacation, user.disease)}
             size="sm"
             variant="flat"
           >
-            {getUserStatus(user.status)}
+            {getStatusText(user.status, user.vacation, user.disease)}
           </Chip>
         </div>
       </div>

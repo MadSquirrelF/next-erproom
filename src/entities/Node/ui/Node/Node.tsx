@@ -15,7 +15,6 @@ import {
   AddUserIcon,
   CloudFolderIcon,
   EditIcon,
-  EyeOpenedIcon,
   MailIcon,
   PaperClipIcon,
   SettingsIcon,
@@ -23,51 +22,49 @@ import {
   TreeOpenedIcon,
 } from "@/src/shared/assets/icons";
 import {
-  IActionManageScreen,
   IInfoManageScreen,
+  IManageScreen,
   useOrgschemaMenu,
 } from "@/src/features/OrgschemaMenu/model/store/orgschemaMenu";
-import {
-  getUsersByEmployee,
-  getUserStatusColor,
-} from "@/src/shared/utils/userFunctions/userFunctions";
-import {
-  IUser,
-  UserListData,
-} from "@/src/features/OrgschemaMenu/model/data/data";
 import { useUpdateIsTogether } from "@/src/features/OrgschemaMenu/model/hooks/useUpdateIsTogether";
+import { useUserStore } from "@/src/entities/User/model/store/user";
+import { IUser } from "@/src/entities/User/model/types/user";
+import { getStatusColor } from "@/src/shared/utils/userFunctions/userFunctions";
 
 interface NodeProps {
-  className?: string;
   node: INode;
 }
 
 export const Node = memo((props: NodeProps) => {
-  const { className, node } = props;
-
+  const { node } = props;
+  const isMenuCollapsed = useOrgschemaMenu((state) => state.isMenuCollapsed);
+  const setIsMenuCollapsed = useOrgschemaMenu(
+    (state) => state.setIsMenuCollapsed,
+  );
   const selectedBlock = useOrgschemaMenu((state) => state.selectedBlock);
   const setSelectedBlock = useOrgschemaMenu((state) => state.setSelectedBlock);
   const setBlockForm = useOrgschemaMenu((state) => state.setBlockForm);
-  const setActionManageScreen = useOrgschemaMenu(
-    (state) => state.setActionManageScreen,
-  );
+  const setManageScreen = useOrgschemaMenu((state) => state.setManageScreen);
 
   const currentInfoManageScreen = useOrgschemaMenu(
     (state) => state.currentInfoManageScreen,
   );
 
-  const setCurrentUser = useOrgschemaMenu((state) => state.setCurrentUser);
+  const setCurrentUser = useUserStore((state) => state.setCurrentUser);
   const setInfoManageScreen = useOrgschemaMenu(
     (state) => state.setInfoManageScreen,
   );
 
-  const currentUser = useOrgschemaMenu((state) => state.currentUser);
+  const currentUser = useUserStore((state) => state.currentUser);
 
   const { theme } = useTheme();
   const { handleIsTogether } = useUpdateIsTogether();
 
   const handleUserCardInfo = (user: IUser) => {
     setSelectedBlock(node);
+    if (isMenuCollapsed) {
+      setIsMenuCollapsed(false);
+    }
     if (!currentUser) {
       setInfoManageScreen(IInfoManageScreen.USER);
       setCurrentUser(user);
@@ -90,6 +87,9 @@ export const Node = memo((props: NodeProps) => {
   };
 
   const handleSelectBlockById = (id: number) => {
+    if (isMenuCollapsed) {
+      setIsMenuCollapsed(false);
+    }
     if (id === selectedBlock?.id) {
       setSelectedBlock(undefined);
     } else {
@@ -98,9 +98,12 @@ export const Node = memo((props: NodeProps) => {
   };
 
   const handleCreateBlock = () => {
+    if (isMenuCollapsed) {
+      setIsMenuCollapsed(false);
+    }
     setSelectedBlock(node);
     setBlockForm(undefined);
-    setActionManageScreen(IActionManageScreen.CREATE);
+    setManageScreen(IManageScreen.CREATE);
   };
 
   const handleOpenLink = (url: string | undefined) => {
@@ -110,21 +113,26 @@ export const Node = memo((props: NodeProps) => {
   };
 
   const handleUpdateBlock = () => {
+    if (isMenuCollapsed) {
+      setIsMenuCollapsed(false);
+    }
     setSelectedBlock(node);
-    setActionManageScreen(IActionManageScreen.UPDATE);
+    setManageScreen(IManageScreen.UPDATE);
   };
 
   const handleUserAdd = () => {
+    if (isMenuCollapsed) {
+      setIsMenuCollapsed(false);
+    }
     setSelectedBlock(node);
-    setActionManageScreen(IActionManageScreen.USER);
+    setManageScreen(IManageScreen.USER);
   };
 
   return (
     <Card
-      // className={`relative bg-gradient-to-br from-default-200 from-0% via-default-200 to-orange-400 z-10 overflow-visible ${selectedBlock?.id === node.id ? "outline-[5px] outline-primary outline-offset-0" : "outline-none"} h-72 w-96 mb-2`}
       className={`relative z-10 select-none overflow-visible ${selectedBlock?.id === node.id ? "outline-[5px] outline-primary outline-offset-0" : "outline-none"} h-72 w-96 mb-2`}
       style={
-        !node.setting.color_block || node.setting.color_block === "#f"
+        node.setting.color_block === "#f"
           ? {
               background: `${theme === "light" ? "#DCDCDF" : "#35353B"}`,
             }
@@ -175,24 +183,31 @@ export const Node = memo((props: NodeProps) => {
                   </span>
                 ) : (
                   <AvatarGroup isBordered className="ml-4" max={6} size="sm">
-                    {getUsersByEmployee(node.employee, UserListData).map(
-                      (user) => (
-                        <Tooltip
-                          key={user.id}
-                          color={getUserStatusColor(user.status)}
-                          content={user.fullName}
-                          placement="top-start"
-                        >
-                          <Avatar
-                            className="cursor-pointer"
-                            color={getUserStatusColor(user.status)}
-                            size="sm"
-                            src={user.avatarPath}
-                            onClick={() => handleUserCardInfo(user)}
-                          />
-                        </Tooltip>
-                      ),
-                    )}
+                    {node.employee.map((user) => (
+                      <Tooltip
+                        key={user.id}
+                        color={getStatusColor(
+                          user.user.status,
+                          user.user.vacation,
+                          user.user.disease,
+                        )}
+                        content={user.user.name}
+                        placement="top-start"
+                      >
+                        <Avatar
+                          className="cursor-pointer"
+                          color={getStatusColor(
+                            user.user.status,
+                            user.user.vacation,
+                            user.user.disease,
+                          )}
+                          name={user.user.name || ""}
+                          size="sm"
+                          src={user.user.avatar || ""}
+                          onClick={() => handleUserCardInfo(user.user)}
+                        />
+                      </Tooltip>
+                    ))}
                   </AvatarGroup>
                 )}
               </div>
@@ -260,43 +275,37 @@ export const Node = memo((props: NodeProps) => {
               </Button>
             </Tooltip>
 
-            <CSSTransition
-              unmountOnExit
-              classNames="slide-animation"
-              in={node.mail !== "" || node.mail !== null}
-              timeout={300}
-            >
-              <Tooltip content="Почта" placement="right">
-                <Button
-                  isIconOnly
-                  color="primary"
-                  size="sm"
-                  variant="flat"
-                  onClick={() => handleOpenLink(node.mail)}
-                >
-                  <MailIcon size={20} />
-                </Button>
-              </Tooltip>
-            </CSSTransition>
+            <Tooltip content="Почта" placement="right">
+              <Button
+                isIconOnly
+                color={
+                  node.mail === "" || node.mail === null ? "default" : "primary"
+                }
+                isDisabled={node.mail === "" || node.mail === null}
+                size="sm"
+                variant="flat"
+                onClick={() => handleOpenLink(node.mail)}
+              >
+                <MailIcon size={20} />
+              </Button>
+            </Tooltip>
 
-            <CSSTransition
-              unmountOnExit
-              classNames="slide-animation"
-              in={node.mail !== "" || node.mail !== null}
-              timeout={300}
-            >
-              <Tooltip content="Облако" placement="right">
-                <Button
-                  isIconOnly
-                  color="primary"
-                  size="sm"
-                  variant="flat"
-                  onClick={() => handleOpenLink(node.cloud)}
-                >
-                  <CloudFolderIcon size={20} />
-                </Button>
-              </Tooltip>
-            </CSSTransition>
+            <Tooltip content="Облако" placement="right">
+              <Button
+                isIconOnly
+                color={
+                  node.cloud === "" || node.cloud === null
+                    ? "default"
+                    : "primary"
+                }
+                isDisabled={node.cloud === "" || node.cloud === null}
+                size="sm"
+                variant="flat"
+                onClick={() => handleOpenLink(node.cloud)}
+              >
+                <CloudFolderIcon size={20} />
+              </Button>
+            </Tooltip>
           </CardBody>
         </Card>
         {/* Конец Кнопки */}
@@ -320,50 +329,37 @@ export const Node = memo((props: NodeProps) => {
               <AddIcon />
             </Button>
           </Tooltip>
-          <CSSTransition
-            unmountOnExit
-            classNames="slide-animation"
-            in={node.all_children_blocks.length > 0}
-            timeout={300}
-          >
-            <Tooltip content="Скрыть блоки" placement="bottom">
-              <Button isIconOnly color="primary" radius="full" size="sm">
-                <EyeOpenedIcon />
-              </Button>
-            </Tooltip>
-          </CSSTransition>
 
-          <CSSTransition
-            unmountOnExit
-            classNames="slide-animation"
-            in={node.all_children_blocks.length > 1}
-            timeout={300}
+          {/* <Tooltip content="Скрыть блоки" placement="bottom">
+            <Button isIconOnly color="primary" radius="full" size="sm">
+              <EyeClosedIcon />
+            </Button>
+          </Tooltip> */}
+
+          <Tooltip
+            content={
+              node.setting.is_together
+                ? "Показать горизонтально"
+                : "Показать вертикально"
+            }
+            placement="bottom"
           >
-            <Tooltip
-              content={
-                node.setting.is_together
-                  ? "Показать горизонтально"
-                  : "Показать вертикально"
+            <Button
+              isIconOnly
+              color="primary"
+              radius="full"
+              size="sm"
+              onClick={() =>
+                handleIsTogether(node.setting.is_together === true ? 0 : 1)
               }
-              placement="bottom"
             >
-              <Button
-                isIconOnly
-                color="primary"
-                radius="full"
-                size="sm"
-                onClick={() =>
-                  handleIsTogether(node.setting.is_together === true ? 0 : 1)
-                }
-              >
-                {node.setting.is_together ? (
-                  <TreeOpenedIcon />
-                ) : (
-                  <TreeClosedIcon />
-                )}
-              </Button>
-            </Tooltip>
-          </CSSTransition>
+              {node.setting.is_together ? (
+                <TreeOpenedIcon />
+              ) : (
+                <TreeClosedIcon />
+              )}
+            </Button>
+          </Tooltip>
         </div>
       </CSSTransition>
     </Card>

@@ -1,8 +1,9 @@
 "use client";
-import { memo } from "react";
+import { memo, useEffect, useRef } from "react";
 import { Skeleton } from "@nextui-org/skeleton";
 import { Button } from "@nextui-org/button";
 import { Autocomplete, AutocompleteItem } from "@nextui-org/autocomplete";
+import { Kbd } from "@nextui-org/kbd";
 
 import { useOrgschemaMenuListbox } from "../../../model/hooks/useOrgschemaMenuListbox";
 
@@ -15,6 +16,7 @@ interface OrgschemaListboxProps {
 
 export const OrgschemaListbox = memo((props: OrgschemaListboxProps) => {
   const { className } = props;
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const {
     data,
@@ -24,6 +26,21 @@ export const OrgschemaListbox = memo((props: OrgschemaListboxProps) => {
     activeSchemaId,
     handleSelectSchema,
   } = useOrgschemaMenuListbox();
+
+  const handleKeyDown = (event: KeyboardEvent) => {
+    if (event.key === "k" && (event.metaKey || event.ctrlKey)) {
+      event.preventDefault(); // Отключаем стандартное поведение
+      inputRef.current?.focus(); // Устанавливаем фокус на input
+    }
+  };
+
+  useEffect(() => {
+    window.addEventListener("keydown", handleKeyDown); // Добавляем обработчик события
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown); // Убираем обработчик при размонтировании
+    };
+  }, []);
 
   if (isLoading) {
     return (
@@ -71,8 +88,10 @@ export const OrgschemaListbox = memo((props: OrgschemaListboxProps) => {
 
   return (
     <Autocomplete
+      ref={inputRef}
       isClearable
       isRequired
+      endContent={<Kbd keys={["command"]}>K</Kbd>}
       label="Выберите схему"
       labelPlacement="outside"
       placeholder="Выберите схему"

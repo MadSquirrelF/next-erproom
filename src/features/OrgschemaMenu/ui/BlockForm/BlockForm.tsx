@@ -33,7 +33,6 @@ interface BlockFormProps {
   cancelTitle: string;
   handleTitle: string;
   isReadOnly?: boolean;
-  isPending: boolean;
   type: string;
   formTitle: string;
   data?: INodeNoChildren;
@@ -53,9 +52,7 @@ interface BlockFormProps {
 
 export const BlockForm = memo((props: BlockFormProps) => {
   const {
-    className,
     type,
-    isPending,
     isReadOnly,
     data,
     formTitle,
@@ -388,7 +385,6 @@ export const BlockForm = memo((props: BlockFormProps) => {
             <p className="text-medium">Без цвета</p>
           </div>
         </Switch>
-        {/* <p>{blockForm?.color}</p> */}
       </div>
 
       <div className="flex flex-col w-full gap-2">

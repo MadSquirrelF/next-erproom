@@ -2,31 +2,35 @@
 import { memo } from "react";
 import NextLink from "next/link";
 import { usePathname } from "next/navigation";
+import { Tooltip } from "@nextui-org/tooltip";
 
 import { SidebarItemType } from "../model/types/sidebar";
 
 interface SidebarItemProps {
   item: SidebarItemType;
-  collapsed: boolean;
 }
 
 export const SidebarItem = memo((props: SidebarItemProps) => {
-  const { item, collapsed } = props;
+  const { item } = props;
 
   const pathname = usePathname();
   const isActive = pathname === item.href;
 
   return (
-    <NextLink
-      className={`flex flex-row gap-3 ${collapsed ? "justify-center" : "justify-start"} items-center p-4 line-clamp-1 rounded-2xl ${isActive ? "bg-primary bg-opacity-85 text-white dark:bg-primary dark:bg-opacity-65" : ""} hover:bg-primary hover:text-white dark:hover:bg-primary`}
-      href={item.href}
+    <Tooltip
+      showArrow
+      color="primary"
+      content={item.label}
+      offset={20}
+      placement="right"
+      size="lg"
     >
-      <item.icon className={`flex-none `} size={30} />
-      <p
-        className={`font-semibold  ${collapsed ? "hidden" : "flex"} whitespace-nowrap overflow-hidden text-ellipsis`}
+      <NextLink
+        className={`flex flex-row gap-3 justify-center items-center p-4 line-clamp-1 rounded-2xl ${isActive ? "bg-primary bg-opacity-85 text-white dark:bg-primary dark:bg-opacity-65" : ""} hover:bg-primary hover:text-white dark:hover:bg-primary`}
+        href={item.href}
       >
-        {item.label}
-      </p>
-    </NextLink>
+        <item.icon className={`flex-none`} size={30} />
+      </NextLink>
+    </Tooltip>
   );
 });

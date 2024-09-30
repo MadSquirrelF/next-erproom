@@ -13,10 +13,6 @@ import { CSSTransition, SwitchTransition } from "react-transition-group";
 
 import { UserInfoCard } from "./UserInfoCard/UserInfoCard";
 
-import {
-  getUsersByEmployee,
-  getUserStatusColor,
-} from "@/src/shared/utils/userFunctions/userFunctions";
 import { getTimeDifferenceFromCreationDate } from "@/src/shared/utils/Date/Date";
 import {
   AddIcon,
@@ -35,15 +31,14 @@ import {
 import { subtitle } from "@/components/primitives";
 import { useOrgschemaMenuManage } from "@/src/features/OrgschemaMenu/model/hooks/useOrgschemaMenuManageBlock";
 import {
-  IActionManageScreen,
   IInfoManageScreen,
+  IManageScreen,
   useOrgschemaMenu,
 } from "@/src/features/OrgschemaMenu/model/store/orgschemaMenu";
-import {
-  IUser,
-  UserListData,
-} from "@/src/features/OrgschemaMenu/model/data/data";
 import { useUpdateIsTogether } from "@/src/features/OrgschemaMenu/model/hooks/useUpdateIsTogether";
+import { useUserStore } from "@/src/entities/User/model/store/user";
+import { IUser } from "@/src/entities/User/model/types/user";
+import { getStatusColor } from "@/src/shared/utils/userFunctions/userFunctions";
 
 interface ActionManageScreenInfoProps {
   className?: string;
@@ -64,17 +59,15 @@ export const ActionManageScreenInfo = memo(
 
     const selectedBlock = useOrgschemaMenu((state) => state.selectedBlock);
 
-    const setCurrentUser = useOrgschemaMenu((state) => state.setCurrentUser);
+    const setCurrentUser = useUserStore((state) => state.setCurrentUser);
 
-    const currentUser = useOrgschemaMenu((state) => state.currentUser);
+    const currentUser = useUserStore((state) => state.currentUser);
 
     const setInfoManageScreen = useOrgschemaMenu(
       (state) => state.setInfoManageScreen,
     );
 
-    const setActionManageScreen = useOrgschemaMenu(
-      (state) => state.setActionManageScreen,
-    );
+    const setManageScreen = useOrgschemaMenu((state) => state.setManageScreen);
 
     const handleUserCardInfo = (user: IUser) => {
       if (!currentUser) {
@@ -202,7 +195,7 @@ export const ActionManageScreenInfo = memo(
 
           default:
             return (
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col h-full gap-2">
                 <Input
                   isReadOnly
                   label="Названиие блока"
@@ -302,15 +295,19 @@ export const ActionManageScreenInfo = memo(
     );
 
     const handleCreateBlock = () => {
-      setActionManageScreen(IActionManageScreen.CREATE);
+      setManageScreen(IManageScreen.CREATE);
     };
 
     const handleUpdateBlock = () => {
-      setActionManageScreen(IActionManageScreen.UPDATE);
+      setManageScreen(IManageScreen.UPDATE);
     };
 
     const handleUserAdd = () => {
-      setActionManageScreen(IActionManageScreen.USER);
+      setManageScreen(IManageScreen.USER);
+    };
+
+    const handleFileAdd = () => {
+      setManageScreen(IManageScreen.FILE);
     };
 
     const handleOpenLink = (url: string | undefined) => {
@@ -331,7 +328,7 @@ export const ActionManageScreenInfo = memo(
     }
 
     return (
-      <div className="flex flex-col gap-4 justify-between h-full">
+      <div className="flex flex-col gap-2 justify-between h-full w-full">
         <div className="w-full flex flex-row gap-4 justify-between">
           <Tooltip color="success" content="Блок создан">
             <Chip
@@ -384,23 +381,30 @@ export const ActionManageScreenInfo = memo(
                 </div>
               ) : (
                 <AvatarGroup isBordered className="ml-4" max={6}>
-                  {getUsersByEmployee(selectedBlock.employee, UserListData).map(
-                    (user) => (
-                      <Tooltip
-                        key={user.id}
-                        color={getUserStatusColor(user.status)}
-                        content={user.fullName}
-                        placement="top-start"
-                      >
-                        <Avatar
-                          className="cursor-pointer"
-                          color={getUserStatusColor(user.status)}
-                          src={user.avatarPath}
-                          onClick={() => handleUserCardInfo(user)}
-                        />
-                      </Tooltip>
-                    ),
-                  )}
+                  {selectedBlock.employee.map((user) => (
+                    <Tooltip
+                      key={user.id}
+                      color={getStatusColor(
+                        user.user.status,
+                        user.user.vacation,
+                        user.user.disease,
+                      )}
+                      content={user.user.name}
+                      placement="top-start"
+                    >
+                      <Avatar
+                        className="cursor-pointer"
+                        color={getStatusColor(
+                          user.user.status,
+                          user.user.vacation,
+                          user.user.disease,
+                        )}
+                        name={user.user.name || ""}
+                        src={user.user.avatar || ""}
+                        onClick={() => handleUserCardInfo(user.user)}
+                      />
+                    </Tooltip>
+                  ))}
                 </AvatarGroup>
               )}
             </div>
@@ -416,7 +420,7 @@ export const ActionManageScreenInfo = memo(
             </Tooltip>
           </div>
           <div className="flex flex-none flex-row mt-5 h-44 w-full gap-2">
-            <div className="flex flex-col w-1/2 gap-2">
+            <div className="flex flex-col w-full gap-2">
               <Card
                 isBlurred
                 isPressable
@@ -434,7 +438,7 @@ export const ActionManageScreenInfo = memo(
                   </span>
                   <EditIcon
                     className="absolute text-primary bottom-2 right-2"
-                    size={30}
+                    size={45}
                   />
                 </CardBody>
               </Card>
@@ -455,13 +459,13 @@ export const ActionManageScreenInfo = memo(
                   </span>
                   <AddIcon
                     className="absolute text-primary bottom-2 right-2"
-                    size={30}
+                    size={45}
                   />
                 </CardBody>
               </Card>
             </div>
 
-            <div className="flex flex-col w-full  gap-2">
+            <div className="flex flex-col w-full gap-2">
               <Card isBlurred isDisabled isPressable className="h-full w-full">
                 <CardBody className="relative">
                   <span
@@ -474,7 +478,7 @@ export const ActionManageScreenInfo = memo(
                   </span>
                   <EyeClosedIcon
                     className="absolute text-primary bottom-2 right-2"
-                    size={30}
+                    size={45}
                   />
                 </CardBody>
               </Card>
@@ -496,26 +500,31 @@ export const ActionManageScreenInfo = memo(
                     })}
                   >
                     {selectedBlock.setting.is_together
-                      ? "Горизонтально показать"
-                      : "Вертикально показать"}
+                      ? "Разделить блоки"
+                      : "Объединить блоки вместе"}
                   </span>
                   {selectedBlock.setting.is_together ? (
                     <TreeOpenedIcon
                       className="absolute text-primary bottom-2 right-2"
-                      size={30}
+                      size={45}
                     />
                   ) : (
                     <TreeClosedIcon
                       className="absolute text-primary bottom-2 right-2"
-                      size={30}
+                      size={45}
                     />
                   )}
                 </CardBody>
               </Card>
             </div>
 
-            <div className="flex flex-col w-full  gap-2">
-              <Card isBlurred isDisabled isPressable className="h-full w-full">
+            <div className="flex flex-col w-full gap-2">
+              <Card
+                isBlurred
+                isPressable
+                className="h-full w-full"
+                onClick={handleFileAdd}
+              >
                 <CardBody className="relative">
                   <span
                     className={subtitle({
@@ -527,7 +536,7 @@ export const ActionManageScreenInfo = memo(
                   </span>
                   <PaperClipIcon
                     className="absolute text-primary bottom-2 right-2"
-                    size={30}
+                    size={45}
                   />
                 </CardBody>
               </Card>
@@ -549,7 +558,7 @@ export const ActionManageScreenInfo = memo(
                       </span>
                       <TrashIcon
                         className="absolute text-danger bottom-2 right-2"
-                        size={30}
+                        size={45}
                       />
                     </CardBody>
                   </Card>

@@ -1,19 +1,25 @@
 "use client";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
-import { FocusEvent, useCallback, useMemo, useRef, useState } from "react";
+import {
+  FocusEvent,
+  FormEvent,
+  useCallback,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 import { OrgschemaService } from "../services/orgschema";
 import { IOrgschemaMenuSteps, useOrgschemaMenu } from "../store/orgschemaMenu";
 
-import { ISchema } from "@/src/entities/Schema";
+import { useOrgschemaBoardStore } from "@/src/features/OrgschemaBoard/model/store/orgschemaBoardStore";
 
 export const useUpdateSchema = () => {
   const queryClient = useQueryClient();
 
   const activeSchemaId = useOrgschemaMenu((state) => state.activeSchemaId);
 
-  const loadedSchema = useOrgschemaMenu((state) => state.loadedSchema);
   const setStep = useOrgschemaMenu((state) => state.setStep);
   const setSelectedBlock = useOrgschemaMenu((state) => state.setSelectedBlock);
 
@@ -24,29 +30,23 @@ export const useUpdateSchema = () => {
   );
 
   const schemaInputValue = useOrgschemaMenu((state) => state.schemaInputValue);
-  const setLoadedSchema = useOrgschemaMenu((state) => state.setLoadedSchema);
+  const schemaName = useOrgschemaMenu((state) => state.schemaName);
+  const setSchemaName = useOrgschemaMenu((state) => state.setSchemaName);
   const setSchemaInputValue = useOrgschemaMenu(
     (state) => state.setSchemaInputValue,
+  );
+
+  const setIsSchemaLoaded = useOrgschemaBoardStore(
+    (state) => state.setIsSchemaLoaded,
   );
   const [isDeletedPopoverOpen, setIsDeletedPopoverOpen] = useState(false);
   const [isCreatePopoverOpen, setIsCreatePopoverOpen] = useState(false);
   const [isSchemaInputReadonly, setIsSchemaInputReadonly] = useState(true);
 
-  const { isLoading, isError, error, refetch } = useQuery<ISchema>({
-    queryKey: ["get schema tree by id", activeSchemaId],
-    queryFn: () => OrgschemaService.getSchemaById(activeSchemaId),
-    enabled: false,
-    select: (data) => {
-      setLoadedSchema(data);
-
-      return data;
-    },
-  });
-
   const { mutate: createSchema } = useMutation<number>({
     mutationKey: ["create new schema"],
     mutationFn: () => OrgschemaService.createSchema(schemaInputValue),
-    onSuccess: () => {
+    onSuccess: (data) => {
       toast.success("Схема успешно создана");
 
       setIsCreatePopoverOpen(false);
@@ -54,6 +54,10 @@ export const useUpdateSchema = () => {
       queryClient.invalidateQueries({
         queryKey: ["get all schemas"],
       });
+
+      console.log(data);
+
+      setActiveSchemaId(data);
     },
     onError: (error: any) => {
       toast.error("Ошибка при создании схемы");
@@ -72,7 +76,9 @@ export const useUpdateSchema = () => {
         queryKey: ["get all schemas"],
       });
 
-      refetch();
+      queryClient.invalidateQueries({
+        queryKey: ["get schema tree by id", activeSchemaId],
+      });
 
       setIsSchemaInputReadonly(true);
     },
@@ -92,7 +98,7 @@ export const useUpdateSchema = () => {
 
       setActiveSchemaId(undefined);
 
-      setLoadedSchema(undefined);
+      setIsSchemaLoaded(false);
 
       setIsDeletedPopoverOpen(false);
 
@@ -113,7 +119,7 @@ export const useUpdateSchema = () => {
     deleteSchema();
   };
 
-  const handleCreateSchema = (event: React.MouseEvent<HTMLButtonElement>) => {
+  const handleCreateSchema = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     createSchema();
   };
@@ -128,6 +134,7 @@ export const useUpdateSchema = () => {
 
   const handleSetIsCreatePopoverOpen = () => {
     setIsCreatePopoverOpen(true);
+    setSchemaInputValue("");
   };
 
   const handleSetIsCreatePopoverClose = () => {
@@ -146,16 +153,16 @@ export const useUpdateSchema = () => {
         return;
       }
 
-      if (schemaInputValue === loadedSchema?.name) {
+      if (schemaInputValue !== schemaName) {
         setIsSchemaInputReadonly(true);
-        setSchemaInputValue("");
+        setSchemaInputValue(schemaName);
 
         return;
       } else {
         setIsSchemaInputReadonly(true);
       }
     },
-    [schemaInputValue, loadedSchema],
+    [schemaInputValue, schemaName],
   );
 
   return useMemo(

@@ -11,14 +11,9 @@ import {
   IInfoManageScreen,
   useOrgschemaMenu,
 } from "@/src/features/OrgschemaMenu/model/store/orgschemaMenu";
-import {
-  getUserStatus,
-  getUserStatusColor,
-} from "@/src/shared/utils/userFunctions/userFunctions";
 import { subtitle } from "@/components/primitives";
 import {
   AllUsersIcon,
-  ArrowLeftIcon,
   CalendarIcon,
   HospitalIcon,
   LinkIcon,
@@ -27,6 +22,12 @@ import {
   RemoveUserIcon,
   VacationBoxIcon,
 } from "@/src/shared/assets/icons";
+import { useUserStore } from "@/src/entities/User/model/store/user";
+import {
+  formatFullName,
+  getStatusColor,
+  getStatusText,
+} from "@/src/shared/utils/userFunctions/userFunctions";
 
 interface UserInfoCardProps {
   className?: string;
@@ -39,8 +40,8 @@ export const UserInfoCard = memo((props: UserInfoCardProps) => {
     (state) => state.setInfoManageScreen,
   );
 
-  const currentUser = useOrgschemaMenu((state) => state.currentUser);
-  const setCurrentUser = useOrgschemaMenu((state) => state.setCurrentUser);
+  const currentUser = useUserStore((state) => state.currentUser);
+  const setCurrentUser = useUserStore((state) => state.setCurrentUser);
 
   const back = () => {
     setInfoManageScreen(IInfoManageScreen.BLOCK);
@@ -57,13 +58,18 @@ export const UserInfoCard = memo((props: UserInfoCardProps) => {
   }
 
   return (
-    <div className="flex flex-col gap-2 h-full w-full items-start">
+    <div className="flex flex-col gap-2 h-[228px] w-full items-start">
       <div className="flex flex-row w-full flex-grow h-full gap-4 items-center">
         <Avatar
           isBordered
-          className="w-20 h-20 text-large"
-          color={getUserStatusColor(currentUser.status)}
-          src={currentUser.avatarPath}
+          className="w-20 h-20 text-large flex-none"
+          color={getStatusColor(
+            currentUser.status,
+            currentUser.vacation,
+            currentUser.disease,
+          )}
+          name={currentUser.name || ""}
+          src={currentUser.avatar || ""}
         />
         <div className="flex flex-col flex-grow gap-1">
           <h3
@@ -73,13 +79,28 @@ export const UserInfoCard = memo((props: UserInfoCardProps) => {
               lineCamp: "one",
             })}
           >
-            {currentUser.fullName}
+            {formatFullName(
+              currentUser.name,
+              currentUser.middlename,
+              currentUser.lastname,
+            )}
           </h3>
 
           <div className="flex flex-row gap-2 w-full justify-between">
-            <p>{currentUser.position}</p>
-            <Chip color={getUserStatusColor(currentUser.status)} variant="flat">
-              {getUserStatus(currentUser.status)}
+            <p>{currentUser.position_id}</p>
+            <Chip
+              color={getStatusColor(
+                currentUser.status,
+                currentUser.vacation,
+                currentUser.disease,
+              )}
+              variant="flat"
+            >
+              {getStatusText(
+                currentUser.status,
+                currentUser.vacation,
+                currentUser.disease,
+              )}
             </Chip>
           </div>
           <div className="flex flex-row gap-2 w-full">
@@ -111,7 +132,7 @@ export const UserInfoCard = memo((props: UserInfoCardProps) => {
       <div className="flex flex-col flex-grow gap-3">
         <div className="flex flex-row gap-2 w-full">
           <div className="flex flex-row gap-2 items-center">
-            <MailIcon size={30} />
+            <MailIcon className="flex-none" size={30} />
 
             <p
               className={subtitle({
@@ -120,11 +141,11 @@ export const UserInfoCard = memo((props: UserInfoCardProps) => {
                 lineCamp: "one",
               })}
             >
-              {currentUser.email}
+              {currentUser.email ? currentUser.email : "Почта неуказана"}
             </p>
           </div>
           <div className="flex flex-row gap-2 items-center">
-            <CalendarIcon size={30} />
+            <CalendarIcon className="flex-none" size={30} />
 
             <p
               className={subtitle({
@@ -133,13 +154,15 @@ export const UserInfoCard = memo((props: UserInfoCardProps) => {
                 lineCamp: "one",
               })}
             >
-              {currentUser.birthday}
+              {currentUser.birthday
+                ? currentUser.birthday
+                : "Дата рождения неуказана"}
             </p>
           </div>
         </div>
         <div className="flex flex-row gap-2 w-full">
           <div className="flex flex-row gap-2 items-center">
-            <PhoneIcon size={30} />
+            <PhoneIcon className="flex-none" size={30} />
 
             <p
               className={subtitle({
@@ -148,11 +171,11 @@ export const UserInfoCard = memo((props: UserInfoCardProps) => {
                 lineCamp: "one",
               })}
             >
-              {currentUser.phone}
+              {currentUser.phones ? currentUser.phones : "Номер неуказан"}
             </p>
           </div>
           <div className="flex flex-row gap-2 items-center">
-            <PhoneIcon size={30} />
+            <PhoneIcon className="flex-none" size={30} />
 
             <p
               className={subtitle({
@@ -161,23 +184,32 @@ export const UserInfoCard = memo((props: UserInfoCardProps) => {
                 lineCamp: "one",
               })}
             >
-              {currentUser.workPhone}
+              {currentUser.job_phones
+                ? currentUser.job_phones
+                : "Номер неуказан"}
             </p>
           </div>
         </div>
         <div className="flex flex-row gap-2 w-full">
-          <Button
-            color="danger"
-            size="sm"
-            startContent={<ArrowLeftIcon />}
-            onClick={back}
-          >
+          <Button color="danger" size="sm" variant="flat" onClick={back}>
             Назад
           </Button>
           <div className="flex flex-row gap-2 items-center">
-            <LinkIcon size={30} />
+            <LinkIcon className="flex-none" size={30} />
 
-            <Link href={currentUser.vksLink}>Ссылка на комнату</Link>
+            {currentUser.vks_link ? (
+              <Link href={currentUser.vks_link}>Ссылка на комнату</Link>
+            ) : (
+              <p
+                className={subtitle({
+                  size: "tiny",
+                  fullWidth: true,
+                  lineCamp: "one",
+                })}
+              >
+                Ссылка не указана
+              </p>
+            )}
           </div>
         </div>
       </div>

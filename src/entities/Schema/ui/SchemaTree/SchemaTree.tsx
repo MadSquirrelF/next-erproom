@@ -2,37 +2,21 @@
 import { memo } from "react";
 
 import { SchemaBlock } from "../SchemaBlock/SchemaBlock";
+import { ISchema } from "../../model/types/schema";
 
-import { useOrgschemaMenu } from "@/src/features/OrgschemaMenu/model/store/orgschemaMenu";
 import { subtitle, title } from "@/components/primitives";
+import { useOrgschemaBoardStore } from "@/src/features/OrgschemaBoard/model/store/orgschemaBoardStore";
 
 interface SchemaTreeProps {
-  className?: string;
+  schema: ISchema;
 }
 
 export const SchemaTree = memo((props: SchemaTreeProps) => {
-  const { className } = props;
+  const { schema } = props;
 
-  const loadedSchema = useOrgschemaMenu((state) => state.loadedSchema);
-  const zoomCount = useOrgschemaMenu((state) => state.zoomCount);
+  const zoomCount = useOrgschemaBoardStore((state) => state.zoomCount);
 
-  if (!loadedSchema) {
-    return (
-      <div className="flex items-center flex-col justify-center w-full h-full text-center">
-        <h5
-          className={title({
-            size: "sm",
-            color: "blue",
-          })}
-        >
-          Схема не загружена.
-        </h5>
-        <p className={subtitle()}>Загрузите схему, чтобы просмотреть блоки.</p>
-      </div>
-    );
-  }
-
-  if (!loadedSchema.blocks || loadedSchema.blocks.length === 0) {
+  if (!schema.blocks || schema.blocks.length === 0) {
     return (
       <div className="flex items-center flex-col justify-center w-full h-full text-center">
         <h5
@@ -59,7 +43,7 @@ export const SchemaTree = memo((props: SchemaTreeProps) => {
         transition: "transform 0.2s",
       }}
     >
-      <SchemaBlock block={loadedSchema.blocks[0]} />
+      <SchemaBlock block={schema.blocks[0]} />
     </ul>
   );
 });

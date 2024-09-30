@@ -68,7 +68,9 @@ export const OrgschemaService = {
       },
     );
 
-    return data.data.orgboard_id;
+    console.log(data);
+
+    return data.data.scheme_id;
   },
 
   async updateSchema(schemaId?: number, name?: string) {
@@ -110,7 +112,11 @@ export const OrgschemaService = {
         sort: blockData?.sort,
         parent_id: blockData?.parent_id,
         is_together: blockData?.is_together,
-        color_block: blockData?.isColorClear ? "#f" : blockData?.color,
+        color_block: blockData?.isColorClear
+          ? "#f"
+          : blockData?.color
+            ? blockData.color
+            : "#DA2A2A",
         _method: "PATCH",
       },
     );
@@ -118,10 +124,16 @@ export const OrgschemaService = {
     return data;
   },
 
-  async updateUsers(schemaId?: number, blockId?: number, users?: number[]) {
+  async updateUsers(
+    schemaId?: number,
+    blockId?: number,
+    users?: number[],
+    name?: string,
+  ) {
     const { data } = await axiosClassic.post<ISchemasResponse>(
       API_URL.orgschema(`/${schemaId}/blocks/${blockId}`),
       {
+        name: name,
         employee: JSON.stringify(users),
         _method: "PATCH",
       },

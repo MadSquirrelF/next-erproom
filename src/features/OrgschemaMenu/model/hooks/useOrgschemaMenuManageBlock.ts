@@ -1,5 +1,5 @@
 "use client";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { useMemo, useState } from "react";
 
@@ -15,21 +15,8 @@ export const useOrgschemaMenuManage = () => {
   const setSelectedBlock = useOrgschemaMenu((state) => state.setSelectedBlock);
   const selectedBlock = useOrgschemaMenu((state) => state.selectedBlock);
 
-  const setLoadedSchema = useOrgschemaMenu((state) => state.setLoadedSchema);
   const setManageScreen = useOrgschemaMenu((state) => state.setManageScreen);
-  const loadedSchema = useOrgschemaMenu((state) => state.loadedSchema);
   const activeSchemaId = useOrgschemaMenu((state) => state.activeSchemaId);
-
-  const { isLoading, isError, error, refetch } = useQuery<ISchema>({
-    queryKey: ["get schema tree by id", activeSchemaId],
-    queryFn: () => OrgschemaService.getSchemaById(activeSchemaId),
-    enabled: false,
-    select: (data) => {
-      setLoadedSchema(data);
-
-      return data;
-    },
-  });
 
   const { mutate: deleteBlock } = useMutation({
     mutationKey: ["delete block"],
@@ -42,13 +29,19 @@ export const useOrgschemaMenuManage = () => {
 
       setIsDeletedPopoverOpen(false);
 
-      await queryClient.invalidateQueries({
+      queryClient.invalidateQueries({
         queryKey: ["get all blocks by schema id", activeSchemaId],
       });
 
-      const result = await refetch();
+      queryClient.invalidateQueries({
+        queryKey: ["get schema tree by id", activeSchemaId],
+      });
 
-      if (result.data?.blocks && result.data.blocks.length === 0) {
+      const result = await queryClient.fetchQuery<ISchema>({
+        queryKey: ["get schema tree by id", activeSchemaId],
+      });
+
+      if (result.blocks && result.blocks.length === 0) {
         setManageScreen(IManageScreen.EMPTY);
       }
     },

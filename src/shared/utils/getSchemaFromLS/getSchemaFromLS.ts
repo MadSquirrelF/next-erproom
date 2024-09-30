@@ -3,25 +3,18 @@ import { SCHEMA_MENU_LOCALSTORAGE_KEY } from "../../constants/constants";
 
 import {
   IOrgschemaMenu,
-  IOrgschemaMenuSection,
   IOrgschemaMenuSteps,
 } from "@/src/features/OrgschemaMenu/model/store/orgschemaMenu";
 
 export const loadStateFromLocalStorage = (): Pick<
   IOrgschemaMenu,
-  | "activeSchemaId"
-  | "currentRoute"
-  | "currentSection"
-  | "currentStep"
-  | "loadedSchema"
-  | "zoomCount"
-  | "isMenuCollapsed"
+  "activeSchemaId" | "currentStep" | "isMenuCollapsed"
 > => {
   if (typeof window !== "undefined" && window.localStorage) {
     const savedState = localStorage.getItem(SCHEMA_MENU_LOCALSTORAGE_KEY);
     const result: IOrgschemaMenu = savedState ? JSON.parse(savedState) : {};
 
-    let currentStep = IOrgschemaMenuSteps.SECTION;
+    let currentStep = IOrgschemaMenuSteps.LIST;
 
     if (result.activeSchemaId) {
       currentStep = IOrgschemaMenuSteps.LIST;
@@ -33,20 +26,12 @@ export const loadStateFromLocalStorage = (): Pick<
       currentStep: currentStep,
       isMenuCollapsed: result.isMenuCollapsed || false,
       activeSchemaId: result.activeSchemaId,
-      currentSection: result.currentSection || IOrgschemaMenuSection.NONE,
-      loadedSchema: result.loadedSchema,
-      currentRoute: result.currentRoute,
-      zoomCount: result.zoomCount || 1,
     };
   }
 
   return {
-    currentStep: IOrgschemaMenuSteps.SECTION,
+    currentStep: IOrgschemaMenuSteps.LIST,
     isMenuCollapsed: false,
     activeSchemaId: undefined,
-    currentSection: IOrgschemaMenuSection.NONE,
-    loadedSchema: undefined,
-    currentRoute: null,
-    zoomCount: 1,
   };
 };

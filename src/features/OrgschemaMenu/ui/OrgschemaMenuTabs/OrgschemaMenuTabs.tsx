@@ -3,21 +3,20 @@ import { Tab, Tabs } from "@nextui-org/tabs";
 import { Key, memo } from "react";
 
 import {
-  IOrgschemaMenuSection,
   IOrgschemaMenuSteps,
   useOrgschemaMenu,
 } from "../../model/store/orgschemaMenu";
 
-import { ConvertCubeIcon, EditIcon, NoteIcon } from "@/src/shared/assets/icons";
+import { EditIcon, OrgSchemaIcon, RoutesIcon } from "@/src/shared/assets/icons";
+import { useOrgschemaBoardStore } from "@/src/features/OrgschemaBoard/model/store/orgschemaBoardStore";
 
 export const OrgschemaMenuTabs = memo(() => {
-  const currentSection = useOrgschemaMenu((state) => state.currentSection);
-  const loadedSchema = useOrgschemaMenu((state) => state.loadedSchema);
-
   const setStep = useOrgschemaMenu((state) => state.setStep);
   const currentStep = useOrgschemaMenu((state) => state.currentStep);
   const setSelectedBlock = useOrgschemaMenu((state) => state.setSelectedBlock);
-
+  const isSchemaLoaded = useOrgschemaBoardStore(
+    (state) => state.isSchemaLoaded,
+  );
   const handleSelectionChange = (key: Key) => {
     const step = key as IOrgschemaMenuSteps;
 
@@ -36,33 +35,31 @@ export const OrgschemaMenuTabs = memo(() => {
       onSelectionChange={handleSelectionChange}
     >
       <Tab
-        key={IOrgschemaMenuSteps.SECTION}
-        title={
-          <div className="flex items-center space-x-2">
-            <ConvertCubeIcon />
-            <span>Секции</span>
-          </div>
-        }
-      />
-      <Tab
         key={IOrgschemaMenuSteps.LIST}
-        isDisabled={currentSection === IOrgschemaMenuSection.NONE}
         title={
           <div className="flex items-center space-x-2">
-            <NoteIcon />
-            <span>Список</span>
+            <OrgSchemaIcon />
+            <span>Оргсхемы</span>
           </div>
         }
       />
       <Tab
         key={IOrgschemaMenuSteps.MANAGE}
-        isDisabled={
-          currentSection === IOrgschemaMenuSection.NONE || !loadedSchema
-        }
+        isDisabled={!isSchemaLoaded}
         title={
           <div className="flex items-center space-x-2">
             <EditIcon />
             <span>Управление</span>
+          </div>
+        }
+      />
+      <Tab
+        key={IOrgschemaMenuSteps.ROUTES}
+        isDisabled={!isSchemaLoaded}
+        title={
+          <div className="flex items-center space-x-2">
+            <RoutesIcon />
+            <span>Маршруты</span>
           </div>
         }
       />

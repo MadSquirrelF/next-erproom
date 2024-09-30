@@ -1,3 +1,5 @@
+import { IUser } from "@/src/entities/User/model/types/user";
+
 export interface INodeSetting {
   id: number;
   orgboard_block_id: number;
@@ -11,6 +13,7 @@ export interface INodeEmployee {
   id: number;
   orgboard_block_id: number;
   user_id: number;
+  user: IUser;
 }
 export interface INode {
   id: number;

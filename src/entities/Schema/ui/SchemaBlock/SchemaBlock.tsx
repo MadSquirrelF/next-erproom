@@ -34,8 +34,7 @@ export const SchemaBlock = memo((props: SchemaBlockProps) => {
             <SchemaBlock
               key={item.id}
               block={
-                item.setting.color_block === "#f" ||
-                item.setting.color_block === null
+                item.setting.color_block === "#f"
                   ? {
                       ...item,
                       setting: {

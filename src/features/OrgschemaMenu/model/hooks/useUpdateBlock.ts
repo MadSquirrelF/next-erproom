@@ -1,16 +1,11 @@
 "use client";
 import { ChangeEvent, Key, useCallback, useMemo } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 
-import {
-  IActionManageScreen,
-  IManageScreen,
-  useOrgschemaMenu,
-} from "../store/orgschemaMenu";
+import { IManageScreen, useOrgschemaMenu } from "../store/orgschemaMenu";
 import { OrgschemaService } from "../services/orgschema";
 
-import { ISchema } from "@/src/entities/Schema";
 import { INode } from "@/src/entities/Node";
 
 export const useUpdateBlock = () => {
@@ -21,27 +16,10 @@ export const useUpdateBlock = () => {
   const setBlockForm = useOrgschemaMenu((state) => state.setBlockForm);
   const selectedBlock = useOrgschemaMenu((state) => state.selectedBlock);
   const setManageScreen = useOrgschemaMenu((state) => state.setManageScreen);
-  const setActionManageScreen = useOrgschemaMenu(
-    (state) => state.setActionManageScreen,
-  );
+
   const setSelectedBlock = useOrgschemaMenu((state) => state.setSelectedBlock);
-  const currentActionManageScreen = useOrgschemaMenu(
-    (state) => state.currentActionManageScreen,
-  );
-  const setLoadedSchema = useOrgschemaMenu((state) => state.setLoadedSchema);
 
-  const { isLoading, isError, error, refetch } = useQuery<ISchema>({
-    queryKey: ["get schema tree by id", activeSchemaId],
-    queryFn: () => OrgschemaService.getSchemaById(activeSchemaId),
-    enabled: false,
-    select: (data) => {
-      setLoadedSchema(data);
-
-      return data;
-    },
-  });
-
-  const { mutate: createBlock, isPending } = useMutation<number>({
+  const { mutate: createBlock } = useMutation<number>({
     mutationKey: ["create new block"],
     mutationFn: () => OrgschemaService.createBlock(activeSchemaId, blockForm),
     onSuccess: () => {
@@ -51,15 +29,12 @@ export const useUpdateBlock = () => {
         queryKey: ["get all blocks by schema id", activeSchemaId],
       });
 
-      refetch();
+      queryClient.invalidateQueries({
+        queryKey: ["get schema tree by id", activeSchemaId],
+      });
 
-      if (currentActionManageScreen === IActionManageScreen.CREATE) {
-        setBlockForm(undefined);
-        setActionManageScreen(IActionManageScreen.INFO);
-      } else {
-        setBlockForm(undefined);
-        setManageScreen(IManageScreen.MANAGE);
-      }
+      setBlockForm(undefined);
+      setManageScreen(IManageScreen.MANAGE);
     },
     onError: (error: any) => {
       toast.error("Ошибка при создании блока");
@@ -75,17 +50,20 @@ export const useUpdateBlock = () => {
         selectedBlock?.id,
         blockForm,
       ),
-    onSuccess: () => {
+    onSuccess: async () => {
       toast.success("Блок успешно обновлен");
 
       setBlockForm(undefined);
-      setActionManageScreen(IActionManageScreen.INFO);
 
       queryClient.invalidateQueries({
         queryKey: ["get all blocks by schema id", activeSchemaId],
       });
 
-      const updatedBlocks = queryClient.getQueryData<INode[]>([
+      queryClient.invalidateQueries({
+        queryKey: ["get schema tree by id", activeSchemaId],
+      });
+
+      const updatedBlocks = await queryClient.getQueryData<INode[]>([
         "get all blocks by schema id",
         activeSchemaId,
       ]);
@@ -95,8 +73,8 @@ export const useUpdateBlock = () => {
       );
 
       setSelectedBlock(updatedBlock);
-
-      refetch();
+      setBlockForm(undefined);
+      setManageScreen(IManageScreen.MANAGE);
     },
     onError: (error: any) => {
       toast.error("Ошибка при обновлении блока");
@@ -105,6 +83,11 @@ export const useUpdateBlock = () => {
   });
 
   const cancelUpdate = () => {
+    setBlockForm(undefined);
+    setManageScreen(IManageScreen.MANAGE);
+  };
+
+  const cancelCreateEmpty = () => {
     setBlockForm(undefined);
     setManageScreen(IManageScreen.EMPTY);
   };
@@ -178,7 +161,6 @@ export const useUpdateBlock = () => {
   return useMemo(
     () => ({
       onChangeName,
-      isPending,
       onChangeDescription,
       onChangeDescriptionSecondary,
       createBlock,
@@ -189,14 +171,15 @@ export const useUpdateBlock = () => {
       onChangeSort,
       onClearColor,
       cancelUpdate,
+      cancelCreateEmpty,
       onChangeIsTogether,
       onChangeParentBlock,
     }),
     [
       onChangeName,
-      isPending,
       onClearColor,
       cancelUpdate,
+      cancelCreateEmpty,
       onChangeDescription,
       onChangeDescriptionSecondary,
       createBlock,

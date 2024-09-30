@@ -8,7 +8,6 @@ import { useOrgschemaMenu } from "../store/orgschemaMenu";
 import { ISchema } from "@/src/entities/Schema";
 
 export const useOrgschemaMenuListbox = () => {
-  const currentSection = useOrgschemaMenu((state) => state.currentSection);
   const activeSchemaId = useOrgschemaMenu((state) => state.activeSchemaId);
   const setActiveSchemaId = useOrgschemaMenu(
     (state) => state.setActiveSchemaId,
@@ -34,17 +33,8 @@ export const useOrgschemaMenuListbox = () => {
       isError,
       error,
       handleSelectSchema,
-      currentSection,
       activeSchemaId,
     }),
-    [
-      data,
-      isLoading,
-      isError,
-      error,
-      activeSchemaId,
-      currentSection,
-      handleSelectSchema,
-    ],
+    [data, isLoading, isError, error, activeSchemaId, handleSelectSchema],
   );
 };

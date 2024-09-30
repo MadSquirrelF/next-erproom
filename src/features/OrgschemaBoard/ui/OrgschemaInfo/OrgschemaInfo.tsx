@@ -4,20 +4,20 @@ import { memo } from "react";
 import { Tooltip } from "@nextui-org/tooltip";
 
 import { DateCrateIcon, DateEditIcon } from "@/src/shared/assets/icons";
-import { useOrgschemaMenu } from "@/src/features/OrgschemaMenu/model/store/orgschemaMenu";
 import { getTimeDifferenceFromCreationDate } from "@/src/shared/utils/Date/Date";
 
 interface OrgschemaInfoProps {
-  className?: string;
+  name: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export const OrgschemaInfo = memo((props: OrgschemaInfoProps) => {
-  const { className } = props;
-  const loadedSchema = useOrgschemaMenu((state) => state.loadedSchema);
+  const { name, createdAt, updatedAt } = props;
 
   return (
     <div className="flex flex-col gap-2">
-      <h4>{loadedSchema?.name}</h4>
+      <h4>{name}</h4>
       <Tooltip color="success" content="Блок создан">
         <Chip
           className="w-full"
@@ -25,7 +25,7 @@ export const OrgschemaInfo = memo((props: OrgschemaInfoProps) => {
           startContent={<DateCrateIcon size={20} />}
           variant="faded"
         >
-          {getTimeDifferenceFromCreationDate(loadedSchema?.created_at || null)}
+          {getTimeDifferenceFromCreationDate(createdAt || null)}
         </Chip>
       </Tooltip>
 
@@ -35,7 +35,7 @@ export const OrgschemaInfo = memo((props: OrgschemaInfoProps) => {
           startContent={<DateEditIcon size={20} />}
           variant="faded"
         >
-          {getTimeDifferenceFromCreationDate(loadedSchema?.updated_at || null)}
+          {getTimeDifferenceFromCreationDate(updatedAt || null)}
         </Chip>
       </Tooltip>
     </div>

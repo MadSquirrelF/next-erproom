@@ -6,6 +6,7 @@ import { Providers } from "./providers";
 
 import { siteConfig } from "@/src/shared/config/site";
 import { fontSans } from "@/src/shared/config/fonts";
+import { Navbar } from "@/src/widgets/Navbar/Navbar";
 import { Sidebar } from "@/src/widgets/Sidebar/ui/Sidebar";
 
 export const metadata: Metadata = {
@@ -32,18 +33,21 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html suppressHydrationWarning className="w-screen min-w-screen" lang="ru">
+    <html suppressHydrationWarning className="h-full bg-background" lang="ru">
       <head />
       <body
         className={clsx(
-          "min-h-screen bg-background w-screen font-sans antialiased",
+          "bg-background h-full font-sans antialiased",
           fontSans.variable,
         )}
       >
         <Providers themeProps={{ attribute: "class", defaultTheme: "light" }}>
-          <div className="relative flex flex-row h-screen w-full">
-            <Sidebar />
-            <main className="relative h-full flex-grow w-full">{children}</main>
+          <div className="bg-background min-h-screen w-full">
+            <Navbar />
+            <div className="flex flex-row relative">
+              <Sidebar />
+              {children}
+            </div>
           </div>
         </Providers>
       </body>

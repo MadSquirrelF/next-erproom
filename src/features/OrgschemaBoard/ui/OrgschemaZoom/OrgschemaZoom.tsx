@@ -2,8 +2,9 @@
 import { Button } from "@nextui-org/button";
 import { memo } from "react";
 
+import { useOrgschemaBoardStore } from "../../model/store/orgschemaBoardStore";
+
 import { ZoomInIcon, ZoomOutIcon } from "@/src/shared/assets/icons";
-import { useOrgschemaMenu } from "@/src/features/OrgschemaMenu/model/store/orgschemaMenu";
 
 interface OrgschemaZoomProps {
   className?: string;
@@ -12,8 +13,8 @@ interface OrgschemaZoomProps {
 export const OrgschemaZoom = memo((props: OrgschemaZoomProps) => {
   const { className } = props;
 
-  const zoomCount = useOrgschemaMenu((state) => state.zoomCount);
-  const setZoomCount = useOrgschemaMenu((state) => state.setZoomCount);
+  const zoomCount = useOrgschemaBoardStore((state) => state.zoomCount);
+  const setZoomCount = useOrgschemaBoardStore((state) => state.setZoomCount);
   const roundToTwoDecimals = (num: number) => Math.round(num * 100) / 100;
 
   const handleZoomIn = () => {
