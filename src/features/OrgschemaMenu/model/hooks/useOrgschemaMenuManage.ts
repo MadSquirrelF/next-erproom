@@ -13,7 +13,7 @@ export const useOrgschemaMenuManage = () => {
   const setSelectedBlock = useOrgschemaMenu((state) => state.setSelectedBlock);
 
   // Получить все схемы
-  const { data, isLoading, isError, error } = useQuery<INode[]>({
+  const { data, isLoading, isError, error } = useQuery<INode[] | []>({
     queryKey: ["get all blocks by schema id", activeSchemaId],
     queryFn: () => OrgschemaService.getAllBlocksSchemeById(activeSchemaId),
     enabled: !!activeSchemaId,

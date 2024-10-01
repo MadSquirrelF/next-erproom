@@ -1,4 +1,5 @@
 import { INode } from "@/src/entities/Node";
+import { IRoute } from "@/src/entities/Route/model/types/route";
 import { ISchema } from "@/src/entities/Schema";
 
 export interface IAllSchemasData {
@@ -6,15 +7,27 @@ export interface IAllSchemasData {
 }
 
 export interface IAllBlocksSchemasData {
-  orgboard_blocks: Omit<INode[], "all_children_blocks">;
+  orgboard_blocks: Omit<INode[], "all_children_blocks"> | [];
 }
 
 export interface ISchemaDataById {
   scheme: ISchema;
 }
 
+export interface IRouteResponseId {
+  flow_id: number;
+}
+
+export interface IRouteFlowResponse {
+  flow: IRoute;
+}
+
 export interface IBlockSchemaId {
   orgboard_block_id: number;
+}
+
+export interface IRoutesAllData {
+  flows: IRoute[];
 }
 
 export interface ISchemaId {
@@ -35,6 +48,10 @@ export interface ISchemasResponseById extends ISchemasResponse {
   data: ISchemaDataById;
 }
 
+export interface IRouteById extends ISchemasResponse {
+  data: IRouteFlowResponse;
+}
+
 export interface IAllSchemasResponse extends ISchemasResponse {
   data: IAllSchemasData;
 }
@@ -49,4 +66,12 @@ export interface ICreateBlockSchemasResponse extends ISchemasResponse {
 
 export interface ICreateSchemasResponse extends ISchemasResponse {
   data: ISchemaIdSecondary;
+}
+
+export interface IAllRoutesResponse extends ISchemasResponse {
+  data: IRoutesAllData;
+}
+
+export interface IRouteCreateResponse extends ISchemasResponse {
+  data: IRouteResponseId;
 }

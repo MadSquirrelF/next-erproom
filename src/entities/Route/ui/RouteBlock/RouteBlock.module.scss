@@ -1,0 +1,21 @@
+.item {
+  display: flex;
+  gap: 60px;
+  align-items: center;
+}
+.list {
+  position: relative;
+
+  &::before {
+    position: absolute;
+    content: '';
+    left: 0;
+    transform: translateX(-67px);
+    width: 70px;
+    top: 50%;
+    height: 8px;
+    border-radius: 5px;
+
+    @apply bg-primary;
+  }
+}

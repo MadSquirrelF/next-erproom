@@ -468,6 +468,38 @@ export const ArrowSquareLeftIcon: React.FC<IconSvgProps> = ({
   );
 };
 
+export const ArrowRouteRightIcon: React.FC<IconSvgProps> = ({
+  size,
+  width,
+  height,
+  strokeWidth = 1.5,
+  ...props
+}) => {
+  return (
+    <svg
+      height={size || height}
+      width={size || width}
+      {...props}
+      fill="none"
+      viewBox="7 0 18 24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M4 11.25C3.80109 11.25 3.61032 11.329 3.46967 11.4697C3.32902 11.6103 3.25 11.8011 3.25 12C3.25 12.1989 3.32902 12.3897 3.46967 12.5303C3.61032 12.671 3.80109 12.75 4 12.75V11.25ZM4 12.75H28V11.25H4V12.75Z"
+        fill="currentColor"
+        opacity="0.5"
+      />
+      <path
+        d="M16 6L22 12L16 20"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={strokeWidth}
+      />
+    </svg>
+  );
+};
+
 export const MenuSecondaryIcon: React.FC<IconSvgProps> = ({
   size = 24,
   width,

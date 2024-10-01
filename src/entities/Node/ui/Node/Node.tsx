@@ -33,10 +33,11 @@ import { getStatusColor } from "@/src/shared/utils/userFunctions/userFunctions";
 
 interface NodeProps {
   node: INode;
+  isDisabled?: boolean;
 }
 
 export const Node = memo((props: NodeProps) => {
-  const { node } = props;
+  const { node, isDisabled } = props;
   const isMenuCollapsed = useOrgschemaMenu((state) => state.isMenuCollapsed);
   const setIsMenuCollapsed = useOrgschemaMenu(
     (state) => state.setIsMenuCollapsed,
@@ -132,7 +133,7 @@ export const Node = memo((props: NodeProps) => {
     <Card
       className={`relative z-10 select-none overflow-visible ${selectedBlock?.id === node.id ? "outline-[5px] outline-primary outline-offset-0" : "outline-none"} h-72 w-96 mb-2`}
       style={
-        node.setting.color_block === "#f"
+        node.setting.color_block === null || node.setting.color_block === "#f"
           ? {
               background: `${theme === "light" ? "#DCDCDF" : "#35353B"}`,
             }
@@ -143,14 +144,16 @@ export const Node = memo((props: NodeProps) => {
     >
       <CardBody className="flex p-2 flex-row gap-2">
         {/* Контент вертикальный */}
-        <div className="flex flex-col flex-grow w-full gap-2">
+        <div className="flex flex-col w-[304px] flex-grow gap-2">
           {/* Текст */}
           <Tooltip color="primary" content="Выбрать блок" placement="top">
             <Card
               fullWidth
-              isPressable
-              className="relative flex flex-grow z-10 gap-3"
-              onClick={() => handleSelectBlockById(node.id)}
+              className="relative flex z-10 w-full gap-3"
+              isPressable={!isDisabled}
+              onClick={
+                isDisabled ? () => {} : () => handleSelectBlockById(node.id)
+              }
             >
               <CardBody className="flex flex-col gap-1">
                 <h4 className="font-bold text-lg">{node.name}</h4>
@@ -204,7 +207,11 @@ export const Node = memo((props: NodeProps) => {
                           name={user.user.name || ""}
                           size="sm"
                           src={user.user.avatar || ""}
-                          onClick={() => handleUserCardInfo(user.user)}
+                          onClick={
+                            isDisabled
+                              ? () => {}
+                              : () => handleUserCardInfo(user.user)
+                          }
                         />
                       </Tooltip>
                     ))}
@@ -216,6 +223,7 @@ export const Node = memo((props: NodeProps) => {
                 <Button
                   isIconOnly
                   color="primary"
+                  isDisabled={isDisabled}
                   size="sm"
                   onClick={handleUserAdd}
                 >
@@ -255,6 +263,7 @@ export const Node = memo((props: NodeProps) => {
               <Button
                 isIconOnly
                 color="primary"
+                isDisabled={isDisabled}
                 size="sm"
                 variant="flat"
                 onClick={handleUpdateBlock}
@@ -264,13 +273,25 @@ export const Node = memo((props: NodeProps) => {
             </Tooltip>
 
             <Tooltip content="Прикрепить файл" placement="right">
-              <Button isIconOnly color="primary" size="sm" variant="flat">
+              <Button
+                isIconOnly
+                color="primary"
+                isDisabled={true}
+                size="sm"
+                variant="flat"
+              >
                 <PaperClipIcon size={20} />
               </Button>
             </Tooltip>
 
             <Tooltip content="Дополнительно" placement="right">
-              <Button isIconOnly color="primary" size="sm" variant="flat">
+              <Button
+                isIconOnly
+                color="primary"
+                isDisabled={true}
+                size="sm"
+                variant="flat"
+              >
                 <SettingsIcon size={20} />
               </Button>
             </Tooltip>
@@ -329,12 +350,6 @@ export const Node = memo((props: NodeProps) => {
               <AddIcon />
             </Button>
           </Tooltip>
-
-          {/* <Tooltip content="Скрыть блоки" placement="bottom">
-            <Button isIconOnly color="primary" radius="full" size="sm">
-              <EyeClosedIcon />
-            </Button>
-          </Tooltip> */}
 
           <Tooltip
             content={

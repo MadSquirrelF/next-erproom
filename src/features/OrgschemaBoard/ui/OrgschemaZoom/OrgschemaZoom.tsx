@@ -37,7 +37,7 @@ export const OrgschemaZoom = memo((props: OrgschemaZoomProps) => {
 
   return (
     <div className="flex flex-col gap-3 justify-center item-center">
-      <h4 className="w-full text-center font-bold">Zoom схемы</h4>
+      <h4 className="w-full text-center font-bold">Zoom</h4>
       <div className="flex flex-row gap-1 items-center">
         <Button
           isIconOnly

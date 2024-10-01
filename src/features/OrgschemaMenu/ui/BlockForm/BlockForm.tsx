@@ -83,6 +83,15 @@ export const BlockForm = memo((props: BlockFormProps) => {
     blocks.length < 2;
 
   useEffect(() => {
+    if (type === "create" && (!blocks || blocks.length === 0)) {
+      setBlockForm({
+        ...blockForm,
+        parent_id: 0,
+      });
+    }
+  }, [type, blocks]);
+
+  useEffect(() => {
     if (selectedBlock && onChangeParentBlock) {
       onChangeParentBlock(String(selectedBlock.id));
     }
@@ -127,6 +136,14 @@ export const BlockForm = memo((props: BlockFormProps) => {
   const validateEditForm = () => {
     if (isEqual(blockForm, newBlockForm)) {
       return false;
+    } else if (
+      !blockForm?.name ||
+      !blockForm?.description ||
+      !blockForm?.description_secondary ||
+      blockForm.parent_id === null ||
+      blockForm.parent_id === undefined
+    ) {
+      return false;
     }
 
     return true;
@@ -136,8 +153,12 @@ export const BlockForm = memo((props: BlockFormProps) => {
     if (
       !blockForm?.name ||
       !blockForm?.description ||
-      !blockForm?.description_secondary
+      !blockForm?.description_secondary ||
+      blockForm.parent_id === null ||
+      blockForm.parent_id === undefined
     ) {
+      toast.error("Ошибка валидации parent_id");
+
       return false;
     }
 

@@ -37,20 +37,34 @@ export enum IManageScreen {
   FILE = "FILE",
 }
 
+export enum IRouteScreen {
+  EMPTY = "EMPTY",
+  LIST = "LIST",
+  CREATE = "CREATE",
+  CREATE_EMPTY = "CREATE_EMPTY",
+  UPDATE = "UPDATE",
+  MANAGE = "MANAGE",
+}
+
 export interface IOrgschemaMenu {
   isMenuCollapsed: boolean;
   blockForm?: Partial<INodeData>;
   currentInfoManageScreen: IInfoManageScreen;
   currentStep: IOrgschemaMenuSteps;
+  currentRouteScreen: IRouteScreen;
   activeSchemaId: number | undefined;
+  activeRouteId: number | undefined;
   currentActionManageScreen: IActionManageScreen;
   selectedBlock?: INodeNoChildren;
   currentManageScreen: IManageScreen;
   schemaName: string;
+  routeName: string;
+  routeDescription: string;
   schemaInputValue: string;
 
   setStep: (step: IOrgschemaMenuSteps) => void;
   setActiveSchemaId: (id: number | undefined) => void;
+  setActiveRouteId: (id: number | undefined) => void;
   setSelectedBlock: (block: INodeNoChildren | undefined) => void;
   setBlockForm: (form: Partial<INodeData> | undefined) => void;
   setManageScreen: (manageScreen: IManageScreen) => void;
@@ -59,6 +73,9 @@ export interface IOrgschemaMenu {
   setSchemaInputValue: (value: string) => void;
   setIsMenuCollapsed: (isMenuCollapsed: boolean) => void;
   setSchemaName: (name: string) => void;
+  setRouteName: (name: string) => void;
+  setRouteDescription: (description: string) => void;
+  setCurrentRouteScreen: (routeScreen: IRouteScreen) => void;
 }
 
 export const useOrgschemaMenu = create<IOrgschemaMenu>()(
@@ -66,15 +83,19 @@ export const useOrgschemaMenu = create<IOrgschemaMenu>()(
     (set) => {
       const initialState = {
         currentInfoManageScreen: IInfoManageScreen.BLOCK,
-        currentManageScreen: IManageScreen.EMPTY,
+        currentManageScreen: IManageScreen.MANAGE,
         currentActionManageScreen: IActionManageScreen.INFO,
         schemaInputValue: "",
         currentStep: IOrgschemaMenuSteps.LIST,
         activeSchemaId: undefined,
         selectedBlock: undefined,
         blockForm: undefined,
+        activeRouteId: undefined,
         isMenuCollapsed: false,
         schemaName: "",
+        currentRouteScreen: IRouteScreen.LIST,
+        routeName: "",
+        routeDescription: "",
       };
 
       return {
@@ -92,8 +113,24 @@ export const useOrgschemaMenu = create<IOrgschemaMenu>()(
           set({ activeSchemaId: id });
         },
 
+        setActiveRouteId: (id) => {
+          set({ activeRouteId: id });
+        },
+
         setSelectedBlock: (block) => {
           set({ selectedBlock: block });
+        },
+
+        setRouteName: (name) => {
+          set({ routeName: name });
+        },
+
+        setRouteDescription: (description) => {
+          set({ routeDescription: description });
+        },
+
+        setCurrentRouteScreen: (screen) => {
+          set({ currentRouteScreen: screen });
         },
 
         setBlockForm: (form) => {
@@ -134,7 +171,6 @@ export const useOrgschemaMenu = create<IOrgschemaMenu>()(
     {
       name: SCHEMA_MENU_LOCALSTORAGE_KEY,
       partialize: (state) => ({
-        activeSchemaId: state.activeSchemaId,
         isMenuCollapsed: state.isMenuCollapsed,
       }),
     },

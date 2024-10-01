@@ -153,8 +153,11 @@ export const useUpdateBlock = () => {
   }, []);
 
   const onChangeParentBlock = useCallback((id: Key | null) => {
+    if (id === null) {
+      return;
+    }
     setBlockForm({
-      parent_id: Number(id) || 0,
+      parent_id: Number(id),
     });
   }, []);
 

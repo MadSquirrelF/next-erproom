@@ -1,8 +1,11 @@
 import {
   IAllBlocksSchemasResponse,
+  IAllRoutesResponse,
   IAllSchemasResponse,
   ICreateBlockSchemasResponse,
   ICreateSchemasResponse,
+  IRouteById,
+  IRouteCreateResponse,
   ISchemasResponse,
   ISchemasResponseById,
 } from "../types/orgschema";
@@ -17,6 +20,14 @@ export const OrgschemaService = {
     );
 
     return data.data.schemes;
+  },
+
+  async getAllRoutes() {
+    const { data } = await axiosClassic.get<IAllRoutesResponse>(
+      API_URL.routes(),
+    );
+
+    return data.data.flows;
   },
 
   async getSchemaById(schemaId?: number) {
@@ -52,8 +63,15 @@ export const OrgschemaService = {
         mail: blockData?.mail,
         sort: blockData?.sort,
         parent_id: blockData?.parent_id,
-        is_together: blockData?.is_together,
-        color_block: blockData?.isColorClear ? "#f" : blockData?.color,
+        is_together:
+          blockData?.is_together === 0 || blockData?.is_together === 1
+            ? blockData.is_together
+            : 0,
+        color_block: blockData?.isColorClear
+          ? "#f"
+          : blockData?.color
+            ? blockData.color
+            : "#DA2A2A",
       },
     );
 
@@ -68,9 +86,33 @@ export const OrgschemaService = {
       },
     );
 
-    console.log(data);
-
     return data.data.scheme_id;
+  },
+
+  async getRouteById(routeId?: number) {
+    const { data } = await axiosClassic.get<IRouteById>(
+      API_URL.routes(`/${routeId}`),
+      {
+        params: {
+          optional_show: "flowSteps",
+        },
+      },
+    );
+
+    return data.data.flow;
+  },
+
+  async createRoute(name: string, description: string) {
+    const { data } = await axiosClassic.post<IRouteCreateResponse>(
+      API_URL.routes(``),
+      {
+        name: name,
+        description: description,
+        orgboard_flow_type_id: 1,
+      },
+    );
+
+    return data.data.flow_id;
   },
 
   async updateSchema(schemaId?: number, name?: string) {
@@ -85,9 +127,34 @@ export const OrgschemaService = {
     return data;
   },
 
+  async updateRoute(routeId?: number, name?: string, description?: string) {
+    const { data } = await axiosClassic.post<ISchemasResponse>(
+      API_URL.routes(`/${routeId}`),
+      {
+        name: name,
+        description: description,
+        orgboard_flow_type_id: 1,
+        _method: "PATCH",
+      },
+    );
+
+    return data;
+  },
+
   async deleteSchema(schemaId?: number) {
     const { data } = await axiosClassic.post<ISchemasResponse>(
       API_URL.orgschema(`/${schemaId}`),
+      {
+        _method: "DELETE",
+      },
+    );
+
+    return data;
+  },
+
+  async deleteRoute(routeId?: number) {
+    const { data } = await axiosClassic.post<ISchemasResponse>(
+      API_URL.routes(`/${routeId}`),
       {
         _method: "DELETE",
       },

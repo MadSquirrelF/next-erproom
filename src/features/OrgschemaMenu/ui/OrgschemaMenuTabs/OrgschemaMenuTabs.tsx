@@ -8,19 +8,19 @@ import {
 } from "../../model/store/orgschemaMenu";
 
 import { EditIcon, OrgSchemaIcon, RoutesIcon } from "@/src/shared/assets/icons";
-import { useOrgschemaBoardStore } from "@/src/features/OrgschemaBoard/model/store/orgschemaBoardStore";
 
 export const OrgschemaMenuTabs = memo(() => {
   const setStep = useOrgschemaMenu((state) => state.setStep);
   const currentStep = useOrgschemaMenu((state) => state.currentStep);
   const setSelectedBlock = useOrgschemaMenu((state) => state.setSelectedBlock);
-  const isSchemaLoaded = useOrgschemaBoardStore(
-    (state) => state.isSchemaLoaded,
-  );
+  const activeSchemaId = useOrgschemaMenu((state) => state.activeSchemaId);
+  const setBlockForm = useOrgschemaMenu((state) => state.setBlockForm);
+
   const handleSelectionChange = (key: Key) => {
     const step = key as IOrgschemaMenuSteps;
 
     setSelectedBlock(undefined);
+    setBlockForm(undefined);
     setStep(step);
   };
 
@@ -45,7 +45,7 @@ export const OrgschemaMenuTabs = memo(() => {
       />
       <Tab
         key={IOrgschemaMenuSteps.MANAGE}
-        isDisabled={!isSchemaLoaded}
+        isDisabled={!activeSchemaId}
         title={
           <div className="flex items-center space-x-2">
             <EditIcon />
@@ -55,7 +55,7 @@ export const OrgschemaMenuTabs = memo(() => {
       />
       <Tab
         key={IOrgschemaMenuSteps.ROUTES}
-        isDisabled={!isSchemaLoaded}
+        isDisabled={!activeSchemaId}
         title={
           <div className="flex items-center space-x-2">
             <RoutesIcon />

@@ -13,8 +13,6 @@ import {
 import { OrgschemaService } from "../services/orgschema";
 import { IOrgschemaMenuSteps, useOrgschemaMenu } from "../store/orgschemaMenu";
 
-import { useOrgschemaBoardStore } from "@/src/features/OrgschemaBoard/model/store/orgschemaBoardStore";
-
 export const useUpdateSchema = () => {
   const queryClient = useQueryClient();
 
@@ -31,14 +29,10 @@ export const useUpdateSchema = () => {
 
   const schemaInputValue = useOrgschemaMenu((state) => state.schemaInputValue);
   const schemaName = useOrgschemaMenu((state) => state.schemaName);
-  const setSchemaName = useOrgschemaMenu((state) => state.setSchemaName);
   const setSchemaInputValue = useOrgschemaMenu(
     (state) => state.setSchemaInputValue,
   );
 
-  const setIsSchemaLoaded = useOrgschemaBoardStore(
-    (state) => state.setIsSchemaLoaded,
-  );
   const [isDeletedPopoverOpen, setIsDeletedPopoverOpen] = useState(false);
   const [isCreatePopoverOpen, setIsCreatePopoverOpen] = useState(false);
   const [isSchemaInputReadonly, setIsSchemaInputReadonly] = useState(true);
@@ -50,14 +44,12 @@ export const useUpdateSchema = () => {
       toast.success("Схема успешно создана");
 
       setIsCreatePopoverOpen(false);
+      setActiveSchemaId(data);
+      setStep(IOrgschemaMenuSteps.MANAGE);
 
       queryClient.invalidateQueries({
         queryKey: ["get all schemas"],
       });
-
-      console.log(data);
-
-      setActiveSchemaId(data);
     },
     onError: (error: any) => {
       toast.error("Ошибка при создании схемы");
@@ -97,8 +89,6 @@ export const useUpdateSchema = () => {
       setSelectedBlock(undefined);
 
       setActiveSchemaId(undefined);
-
-      setIsSchemaLoaded(false);
 
       setIsDeletedPopoverOpen(false);
 

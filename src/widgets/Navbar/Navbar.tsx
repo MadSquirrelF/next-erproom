@@ -52,7 +52,7 @@ export const Navbar = memo(() => {
         <NavbarItem className="flex flex-row items-center gap-3">
           <ThemeSwitch />
           <Button
-            color="secondary"
+            color="primary"
             startContent={<LinkIcon />}
             variant="flat"
             onClick={handleNavigateToFront}

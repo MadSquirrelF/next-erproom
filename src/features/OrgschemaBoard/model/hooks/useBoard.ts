@@ -2,12 +2,9 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo } from "react";
 import toast from "react-hot-toast";
 
-import { useOrgschemaBoardStore } from "../store/orgschemaBoardStore";
-
 import { ISchema } from "@/src/entities/Schema";
 import {
   IManageScreen,
-  IOrgschemaMenuSteps,
   useOrgschemaMenu,
 } from "@/src/features/OrgschemaMenu/model/store/orgschemaMenu";
 import { OrgschemaService } from "@/src/features/OrgschemaMenu/model/services/orgschema";
@@ -16,11 +13,6 @@ export const useBoard = () => {
   const activeSchemaId = useOrgschemaMenu((state) => state.activeSchemaId);
   const setSchemaName = useOrgschemaMenu((state) => state.setSchemaName);
   const setManageScreen = useOrgschemaMenu((state) => state.setManageScreen);
-  const setStep = useOrgschemaMenu((state) => state.setStep);
-
-  const setIsSchemaLoaded = useOrgschemaBoardStore(
-    (state) => state.setIsSchemaLoaded,
-  );
 
   const {
     data: schema,
@@ -41,13 +33,7 @@ export const useBoard = () => {
 
   useEffect(() => {
     if (isSuccess) {
-      toast.success("Схема успешно загружена!");
-      setIsSchemaLoaded(true);
-      setStep(IOrgschemaMenuSteps.MANAGE);
-
-      if (schema.blocks && schema.blocks.length > 0) {
-        setManageScreen(IManageScreen.MANAGE);
-      } else {
+      if (schema.blocks && schema.blocks.length === 0) {
         setManageScreen(IManageScreen.EMPTY);
       }
 
