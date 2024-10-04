@@ -2,10 +2,11 @@ import { Button } from "@nextui-org/button";
 import { ChangeEvent, FormEvent, memo } from "react";
 import { Input, Textarea } from "@nextui-org/input";
 
-import { AddIcon } from "@/src/shared/assets/icons";
+import { AddIcon, EditIcon } from "@/src/shared/assets/icons";
 
 interface CreateRouteFormProps {
   className?: string;
+  type: "create" | "update";
   cancel: () => void;
   submit: (event: FormEvent<HTMLFormElement>) => void;
   routeName: string;
@@ -17,6 +18,7 @@ interface CreateRouteFormProps {
 export const CreateRouteForm = memo((props: CreateRouteFormProps) => {
   const {
     className,
+    type,
     routeName,
     routeDescription,
     onChangeRouteDescription,
@@ -55,12 +57,12 @@ export const CreateRouteForm = memo((props: CreateRouteFormProps) => {
         <Button
           fullWidth
           color="primary"
-          endContent={<AddIcon />}
+          endContent={type === "create" ? <AddIcon /> : <EditIcon />}
           isDisabled={!routeName || !routeDescription}
           size="lg"
           type="submit"
         >
-          Создать маршрут
+          {type === "create" ? "Создать маршрут" : "Изменить маршрут"}
         </Button>
       </div>
     </form>

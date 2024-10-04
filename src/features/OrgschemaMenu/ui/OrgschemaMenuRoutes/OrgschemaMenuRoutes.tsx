@@ -6,10 +6,12 @@ import {
   IRouteScreen,
   useOrgschemaMenu,
 } from "../../model/store/orgschemaMenu";
+import { useUpdateFlowStep } from "../../model/hooks/useUpdateFlowStep";
 
 import { RoutesEmptyScreen } from "./RoutesEmptyScreen/RoutesEmptyScreen";
 import { RoutesListScreen } from "./RoutesListScreen/RoutesListScreen";
 import { RoutesManageScreen } from "./RoutesManageScreen/RoutesManageScreen";
+import { FlowStepForm } from "./FlowStepForm/FlowStepForm";
 
 interface OrgschemaMenuRoutesProps {
   className?: string;
@@ -17,9 +19,25 @@ interface OrgschemaMenuRoutesProps {
 
 export const OrgschemaMenuRoutes = memo((props: OrgschemaMenuRoutesProps) => {
   const { className } = props;
+
+  const {
+    handleCancelCreateFlowStepScreen,
+    handleCancelUpdateFlowStepScreen,
+    onChangeFailStatus,
+    onChangeDescription,
+    onChangeSuccesStep,
+    createFlowStep,
+    onChangeFailStep,
+    onChangeParentBlock,
+    onChangeSuccesStatus,
+    onChangeChildBlock,
+    updateFlowStep,
+  } = useUpdateFlowStep();
+
   const currentRouteScreen = useOrgschemaMenu(
     (state) => state.currentRouteScreen,
   );
+
   const renderRouteScreen = useCallback(
     (currentRouteScreen: IRouteScreen) => {
       switch (currentRouteScreen) {
@@ -30,11 +48,59 @@ export const OrgschemaMenuRoutes = memo((props: OrgschemaMenuRoutesProps) => {
         case IRouteScreen.MANAGE:
           return <RoutesManageScreen />;
         case IRouteScreen.CREATE:
-          return <div>CREATE screen</div>;
+          return (
+            <FlowStepForm
+              cancel={handleCancelCreateFlowStepScreen}
+              cancelTitle="Отменить создание"
+              formTitle="Создание шага"
+              handleFlowStep={createFlowStep}
+              handleTitle="Создать шаг"
+              type={"create"}
+              onChangeChildBlock={onChangeChildBlock}
+              onChangeDescription={onChangeDescription}
+              onChangeFailStatus={onChangeFailStatus}
+              onChangeFailStep={onChangeFailStep}
+              onChangeParentBlock={onChangeParentBlock}
+              onChangeSuccesStatus={onChangeSuccesStatus}
+              onChangeSuccesStep={onChangeSuccesStep}
+            />
+          );
         case IRouteScreen.CREATE_EMPTY:
-          return <div>CREATE_EMPTY screen</div>;
+          return (
+            <FlowStepForm
+              cancel={handleCancelCreateFlowStepScreen}
+              cancelTitle="Отменить создание"
+              formTitle="Создание первого шага"
+              handleFlowStep={createFlowStep}
+              handleTitle="Создать первый шаг"
+              type={"create_first"}
+              onChangeChildBlock={onChangeChildBlock}
+              onChangeDescription={onChangeDescription}
+              onChangeFailStatus={onChangeFailStatus}
+              onChangeFailStep={onChangeFailStep}
+              onChangeParentBlock={onChangeParentBlock}
+              onChangeSuccesStatus={onChangeSuccesStatus}
+              onChangeSuccesStep={onChangeSuccesStep}
+            />
+          );
         case IRouteScreen.UPDATE:
-          return <div>UPDATE screen</div>;
+          return (
+            <FlowStepForm
+              cancel={handleCancelUpdateFlowStepScreen}
+              cancelTitle="Отменить редактирование"
+              formTitle="Редактирование шага"
+              handleFlowStep={updateFlowStep}
+              handleTitle="Редактировать шаг"
+              type={"update"}
+              onChangeChildBlock={onChangeChildBlock}
+              onChangeDescription={onChangeDescription}
+              onChangeFailStatus={onChangeFailStatus}
+              onChangeFailStep={onChangeFailStep}
+              onChangeParentBlock={onChangeParentBlock}
+              onChangeSuccesStatus={onChangeSuccesStatus}
+              onChangeSuccesStep={onChangeSuccesStep}
+            />
+          );
 
         default:
           return <RoutesListScreen />;

@@ -85,6 +85,7 @@ export const RoutesListScreen = memo((props: RoutesListScreenProps) => {
               routeDescription={routeDescription}
               routeName={routeName}
               submit={onSubmitCreateRouteForm}
+              type="create"
               onChangeRouteDescription={onChangeRouteDescription}
               onChangeRouteName={onChangeRouteName}
             />

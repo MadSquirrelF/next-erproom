@@ -1,34 +1,43 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  ChangeEvent,
-  FormEvent,
-  useCallback,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { ChangeEvent, FormEvent, useCallback, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 
 import { OrgschemaService } from "../services/orgschema";
 import { IRouteScreen, useOrgschemaMenu } from "../store/orgschemaMenu";
 
+import { IRouteAction } from "@/src/entities/Route/model/types/route";
+
 export const useUpdateRoute = () => {
   const queryClient = useQueryClient();
+
+  const prevRouteName = useOrgschemaMenu((state) => state.routeName);
+  const prevRouteDescription = useOrgschemaMenu(
+    (state) => state.routeDescription,
+  );
+
   const [routeName, setRouteName] = useState("");
+
   const [routeDescription, setRouteDescription] = useState("");
 
-  const inputRef = useRef<HTMLInputElement | null>(null);
+  const [routeAction, setRouteAction] = useState<IRouteAction>(
+    IRouteAction.NONE,
+  );
+
+  const [isDeletedPopoverOpen, setIsDeletedPopoverOpen] = useState(false);
 
   const [isCreateFormOpen, setIsCreateFormOpen] = useState(false);
+
   const setCurrentRouteScreen = useOrgschemaMenu(
     (state) => state.setCurrentRouteScreen,
   );
 
   const setActiveRouteId = useOrgschemaMenu((state) => state.setActiveRouteId);
 
+  const setSelectedFlowStep = useOrgschemaMenu(
+    (state) => state.setSelectedFlowStep,
+  );
+
   const activeRouteId = useOrgschemaMenu((state) => state.activeRouteId);
-  const [isRouteInputReadonly, setIsRouteInputReadonly] = useState(true);
-  const [isDeletedPopoverOpen, setIsDeletedPopoverOpen] = useState(false);
 
   const { mutate: createRoute } = useMutation<number>({
     mutationKey: ["create new route"],
@@ -37,6 +46,7 @@ export const useUpdateRoute = () => {
       toast.success("Маршрут успешно создан");
       setActiveRouteId(data);
       setCurrentRouteScreen(IRouteScreen.MANAGE);
+      setRouteAction(IRouteAction.NONE);
 
       queryClient.invalidateQueries({
         queryKey: ["get all routes"],
@@ -52,7 +62,7 @@ export const useUpdateRoute = () => {
     mutationKey: ["update route", activeRouteId],
     mutationFn: () =>
       OrgschemaService.updateRoute(activeRouteId, routeName, routeDescription),
-    onSuccess: () => {
+    onSuccess: async () => {
       toast.success("Маршрут успешно обвлен");
 
       queryClient.invalidateQueries({
@@ -63,7 +73,8 @@ export const useUpdateRoute = () => {
         queryKey: ["get route by id", activeRouteId],
       });
 
-      setIsRouteInputReadonly(true);
+      setRouteAction(IRouteAction.NONE);
+      clearInputValues();
     },
     onError: (error: any) => {
       toast.error("Ошибка при обновлении схемы");
@@ -81,6 +92,8 @@ export const useUpdateRoute = () => {
 
       setCurrentRouteScreen(IRouteScreen.LIST);
 
+      setSelectedFlowStep(undefined);
+
       setActiveRouteId(undefined);
 
       queryClient.invalidateQueries({
@@ -93,14 +106,6 @@ export const useUpdateRoute = () => {
     },
   });
 
-  const handleEditRoute = () => {
-    setIsRouteInputReadonly(false);
-
-    if (inputRef.current) {
-      inputRef.current.focus();
-    }
-  };
-
   const clearInputValues = () => {
     setRouteName("");
     setRouteDescription("");
@@ -108,6 +113,23 @@ export const useUpdateRoute = () => {
 
   const handleCloseForm = useCallback(() => {
     setIsCreateFormOpen(false);
+    clearInputValues();
+  }, []);
+
+  const handleClearAction = useCallback(() => {
+    setRouteAction(IRouteAction.NONE);
+    clearInputValues();
+  }, []);
+
+  const handleUpdateAction = useCallback(() => {
+    setRouteName(prevRouteName);
+
+    setRouteDescription(prevRouteDescription);
+    setRouteAction(IRouteAction.UPDATE);
+  }, [prevRouteName, prevRouteDescription]);
+
+  const handleCreateAction = useCallback(() => {
+    setRouteAction(IRouteAction.ADD);
     clearInputValues();
   }, []);
 
@@ -121,6 +143,11 @@ export const useUpdateRoute = () => {
     },
     [],
   );
+
+  const handleDeleteRoute = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    deleteRoute();
+  };
 
   const onChangeRouteDescription = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
@@ -137,26 +164,52 @@ export const useUpdateRoute = () => {
     [],
   );
 
+  const onSubmitUpdateRouteForm = useCallback(
+    (event: FormEvent<HTMLFormElement>) => {
+      event.preventDefault();
+      updateRoute();
+    },
+    [],
+  );
+
   return useMemo(
     () => ({
       routeName,
+      handleClearAction,
       routeDescription,
       onChangeRouteName,
       onChangeRouteDescription,
       isCreateFormOpen,
+      handleCreateAction,
       handleCloseForm,
+      handleDeleteRoute,
       handleOpenForm,
       onSubmitCreateRouteForm,
+      isDeletedPopoverOpen,
+      setIsDeletedPopoverOpen,
+      routeAction,
+      handleUpdateAction,
+      onSubmitUpdateRouteForm,
+      setRouteAction,
     }),
     [
       routeName,
       routeDescription,
       onChangeRouteName,
+      onSubmitUpdateRouteForm,
+      handleClearAction,
       onChangeRouteDescription,
       isCreateFormOpen,
+      handleUpdateAction,
+      handleDeleteRoute,
+      handleCreateAction,
       handleCloseForm,
       onSubmitCreateRouteForm,
       handleOpenForm,
+      isDeletedPopoverOpen,
+      setIsDeletedPopoverOpen,
+      routeAction,
+      setRouteAction,
     ],
   );
 };

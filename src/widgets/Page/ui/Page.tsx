@@ -12,7 +12,7 @@ export const Page = memo((props: PageProps) => {
   return (
     <main
       className={clsx(
-        "flex-grow h-[calc(100vh-65px)] overflow-y-auto px-3 z-10 pt-3",
+        "flex-grow h-[calc(100vh-65px)] flex flex-col gap-4 overflow-y-auto overflow-x-hidden p-3 z-10",
         classname,
       )}
     >

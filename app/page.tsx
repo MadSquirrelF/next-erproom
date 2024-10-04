@@ -1,5 +1,22 @@
-import HomePage from "@/src/pages/HomePage/ui/HomePage";
+import { HomeIcon } from "@/src/shared/assets/icons";
+import BreadcrumbsClient, {
+  IBreadcrumbItem,
+} from "@/src/shared/ui/BreadcrumbsClient/BreadcrumbsClient";
+import { Page } from "@/src/widgets/Page";
+
+const breadcrumbs: IBreadcrumbItem[] = [
+  {
+    startContent: <HomeIcon size={20} />,
+    text: "Главная страница",
+    href: "/",
+  },
+];
 
 export default function Home() {
-  return <HomePage />;
+  return (
+    <Page>
+      <BreadcrumbsClient items={breadcrumbs} size="lg" />
+      <p>Home page</p>
+    </Page>
+  );
 }

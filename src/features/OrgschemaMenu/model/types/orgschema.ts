@@ -1,9 +1,14 @@
 import { INode } from "@/src/entities/Node";
-import { IRoute } from "@/src/entities/Route/model/types/route";
+import { INodeShort } from "@/src/entities/Node/model/types/node";
+import { IFlowStep, IRoute } from "@/src/entities/Route/model/types/route";
 import { ISchema } from "@/src/entities/Schema";
 
 export interface IAllSchemasData {
   schemes: ISchema[];
+}
+
+export interface IAllBlocks {
+  all_blocks: INodeShort[];
 }
 
 export interface IAllBlocksSchemasData {
@@ -20,6 +25,10 @@ export interface IRouteResponseId {
 
 export interface IRouteFlowResponse {
   flow: IRoute;
+}
+
+export interface IRouteStepsDataArray {
+  flow_steps: IFlowStep[];
 }
 
 export interface IBlockSchemaId {
@@ -44,34 +53,6 @@ export interface ISchemasResponse {
   message: string;
 }
 
-export interface ISchemasResponseById extends ISchemasResponse {
-  data: ISchemaDataById;
-}
-
-export interface IRouteById extends ISchemasResponse {
-  data: IRouteFlowResponse;
-}
-
-export interface IAllSchemasResponse extends ISchemasResponse {
-  data: IAllSchemasData;
-}
-
-export interface IAllBlocksSchemasResponse extends ISchemasResponse {
-  data: IAllBlocksSchemasData;
-}
-
-export interface ICreateBlockSchemasResponse extends ISchemasResponse {
-  data: IBlockSchemaId;
-}
-
-export interface ICreateSchemasResponse extends ISchemasResponse {
-  data: ISchemaIdSecondary;
-}
-
-export interface IAllRoutesResponse extends ISchemasResponse {
-  data: IRoutesAllData;
-}
-
-export interface IRouteCreateResponse extends ISchemasResponse {
-  data: IRouteResponseId;
+export interface ISchemaResponseWithData<T> extends ISchemasResponse {
+  data: T;
 }

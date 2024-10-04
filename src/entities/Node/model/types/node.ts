@@ -32,6 +32,17 @@ export interface INode {
   all_children_blocks: INode[] | [];
 }
 
+export interface INodeShort {
+  id: number;
+  orgboard_scheme_id: number;
+  parent_id: number;
+  name: string;
+  scheme_name: {
+    id: number;
+    name: string;
+  };
+}
+
 export interface INodeNoChildren extends Omit<INode, "all_children_blocks"> {}
 
 export interface INodeData {

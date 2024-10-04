@@ -7,6 +7,10 @@ import {
   INodeData,
   INodeNoChildren,
 } from "@/src/entities/Node/model/types/node";
+import {
+  IFlowStep,
+  IFlowStepFormData,
+} from "@/src/entities/Route/model/types/route";
 
 export enum IOrgschemaMenuSteps {
   LIST = "LIST",
@@ -49,6 +53,7 @@ export enum IRouteScreen {
 export interface IOrgschemaMenu {
   isMenuCollapsed: boolean;
   blockForm?: Partial<INodeData>;
+  flowStepForm?: Partial<IFlowStepFormData>;
   currentInfoManageScreen: IInfoManageScreen;
   currentStep: IOrgschemaMenuSteps;
   currentRouteScreen: IRouteScreen;
@@ -56,12 +61,15 @@ export interface IOrgschemaMenu {
   activeRouteId: number | undefined;
   currentActionManageScreen: IActionManageScreen;
   selectedBlock?: INodeNoChildren;
+  selectedFlowStep?: IFlowStep;
   currentManageScreen: IManageScreen;
+  isRouteEmpty: boolean;
   schemaName: string;
   routeName: string;
   routeDescription: string;
   schemaInputValue: string;
 
+  setIsRouteEmpty: (isRouteEmpty: boolean) => void;
   setStep: (step: IOrgschemaMenuSteps) => void;
   setActiveSchemaId: (id: number | undefined) => void;
   setActiveRouteId: (id: number | undefined) => void;
@@ -74,7 +82,9 @@ export interface IOrgschemaMenu {
   setIsMenuCollapsed: (isMenuCollapsed: boolean) => void;
   setSchemaName: (name: string) => void;
   setRouteName: (name: string) => void;
+  setSelectedFlowStep: (flowStep: IFlowStep | undefined) => void;
   setRouteDescription: (description: string) => void;
+  setFlowStepForm: (form: Partial<IFlowStepFormData> | undefined) => void;
   setCurrentRouteScreen: (routeScreen: IRouteScreen) => void;
 }
 
@@ -90,12 +100,15 @@ export const useOrgschemaMenu = create<IOrgschemaMenu>()(
         activeSchemaId: undefined,
         selectedBlock: undefined,
         blockForm: undefined,
+        flowStepForm: undefined,
         activeRouteId: undefined,
         isMenuCollapsed: false,
         schemaName: "",
         currentRouteScreen: IRouteScreen.LIST,
         routeName: "",
         routeDescription: "",
+        selectedFlowStep: undefined,
+        isRouteEmpty: false,
       };
 
       return {
@@ -121,6 +134,14 @@ export const useOrgschemaMenu = create<IOrgschemaMenu>()(
           set({ selectedBlock: block });
         },
 
+        setIsRouteEmpty: (isRouteEmpty) => {
+          set({ isRouteEmpty: isRouteEmpty });
+        },
+
+        setSelectedFlowStep: (flowStep) => {
+          set({ selectedFlowStep: flowStep });
+        },
+
         setRouteName: (name) => {
           set({ routeName: name });
         },
@@ -142,6 +163,20 @@ export const useOrgschemaMenu = create<IOrgschemaMenu>()(
           set((state) => ({
             blockForm: {
               ...state.blockForm,
+              ...form,
+            },
+          }));
+        },
+
+        setFlowStepForm: (form) => {
+          if (form === undefined) {
+            set({ flowStepForm: undefined });
+
+            return;
+          }
+          set((state) => ({
+            flowStepForm: {
+              ...state.flowStepForm,
               ...form,
             },
           }));

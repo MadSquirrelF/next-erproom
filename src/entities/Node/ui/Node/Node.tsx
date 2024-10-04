@@ -34,10 +34,11 @@ import { getStatusColor } from "@/src/shared/utils/userFunctions/userFunctions";
 interface NodeProps {
   node: INode;
   isDisabled?: boolean;
+  isReadOnly?: boolean;
 }
 
 export const Node = memo((props: NodeProps) => {
-  const { node, isDisabled } = props;
+  const { node, isDisabled, isReadOnly } = props;
   const isMenuCollapsed = useOrgschemaMenu((state) => state.isMenuCollapsed);
   const setIsMenuCollapsed = useOrgschemaMenu(
     (state) => state.setIsMenuCollapsed,
@@ -128,6 +129,153 @@ export const Node = memo((props: NodeProps) => {
     setSelectedBlock(node);
     setManageScreen(IManageScreen.USER);
   };
+
+  if (isReadOnly) {
+    return (
+      <Card
+        className={`relative z-10 select-none overflow-visible ${selectedBlock?.id === node.id ? "outline-[5px] outline-primary outline-offset-0" : "outline-none"} h-72 w-96 mb-2`}
+        style={
+          node.setting.color_block === null || node.setting.color_block === "#f"
+            ? {
+                background: `${theme === "light" ? "#DCDCDF" : "#35353B"}`,
+              }
+            : {
+                background: `linear-gradient(128deg, ${theme === "light" ? "#DCDCDF" : "#35353B"} 0%, ${theme === "light" ? "#DCDCDF" : "#35353B"} 61%, ${node.setting.color_block} 100%)`,
+              }
+        }
+      >
+        <CardBody className="flex p-2 flex-row gap-2">
+          {/* Контент вертикальный */}
+          <div className="flex flex-col w-[304px] flex-grow gap-2">
+            {/* Текст */}
+
+            <Card fullWidth className="relative flex z-10 w-full gap-3">
+              <CardBody className="flex flex-col gap-1">
+                <h4 className="font-bold text-lg">{node.name}</h4>
+                <p
+                  className={subtitle({
+                    size: "tiny",
+                    lineCamp: "two",
+                  })}
+                >
+                  {node.description}
+                </p>
+              </CardBody>
+            </Card>
+            {/* Пользователи */}
+            <Card fullWidth>
+              <CardBody className="flex flex-row gap-3 items-end justify-between">
+                <div className="flex flex-col gap-2">
+                  <p
+                    className={subtitle({
+                      size: "tiny",
+                      color: "default",
+                    })}
+                  >
+                    Сотрудники:
+                  </p>
+                  {node.employee.length === 0 ? (
+                    <span className="text-danger font-semibold">
+                      Нужно назначить!
+                    </span>
+                  ) : (
+                    <AvatarGroup isBordered className="ml-4" max={6} size="sm">
+                      {node.employee.map((user) => (
+                        <Tooltip
+                          key={user.id}
+                          color={getStatusColor(
+                            user.user.status,
+                            user.user.vacation,
+                            user.user.disease,
+                          )}
+                          content={user.user.name}
+                          placement="top-start"
+                        >
+                          <Avatar
+                            className="cursor-pointer"
+                            color={getStatusColor(
+                              user.user.status,
+                              user.user.vacation,
+                              user.user.disease,
+                            )}
+                            name={user.user.name || ""}
+                            size="sm"
+                            src={user.user.avatar || ""}
+                          />
+                        </Tooltip>
+                      ))}
+                    </AvatarGroup>
+                  )}
+                </div>
+              </CardBody>
+            </Card>
+
+            {/* ЦКП */}
+            <Card fullWidth className="flex-grow">
+              <CardBody className="flex flex-row gap-2 flex-none items-start">
+                <p
+                  className={subtitle({
+                    size: "sm",
+                    color: "default",
+                  })}
+                >
+                  ЦКП:
+                </p>
+                <p
+                  className={subtitle({
+                    size: "tiny",
+                    lineCamp: "two",
+                  })}
+                >
+                  {node.description_secondary}
+                </p>
+              </CardBody>
+            </Card>
+          </div>
+          {/* Конец контент вертикальный */}
+          {/* Кнопки */}
+          <Card>
+            <CardBody className="flex flex-col gap-5 items-center justify-start overflow-hidden">
+              <Tooltip content="Почта" placement="right">
+                <Button
+                  isIconOnly
+                  color={
+                    node.mail === "" || node.mail === null
+                      ? "default"
+                      : "primary"
+                  }
+                  isDisabled={node.mail === "" || node.mail === null}
+                  size="sm"
+                  variant="flat"
+                  onClick={() => handleOpenLink(node.mail)}
+                >
+                  <MailIcon size={20} />
+                </Button>
+              </Tooltip>
+
+              <Tooltip content="Облако" placement="right">
+                <Button
+                  isIconOnly
+                  color={
+                    node.cloud === "" || node.cloud === null
+                      ? "default"
+                      : "primary"
+                  }
+                  isDisabled={node.cloud === "" || node.cloud === null}
+                  size="sm"
+                  variant="flat"
+                  onClick={() => handleOpenLink(node.cloud)}
+                >
+                  <CloudFolderIcon size={20} />
+                </Button>
+              </Tooltip>
+            </CardBody>
+          </Card>
+          {/* Конец Кнопки */}
+        </CardBody>
+      </Card>
+    );
+  }
 
   return (
     <Card

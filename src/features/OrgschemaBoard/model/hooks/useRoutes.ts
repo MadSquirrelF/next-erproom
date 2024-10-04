@@ -12,6 +12,8 @@ export const useRoutes = () => {
     (state) => state.setCurrentRouteScreen,
   );
 
+  const setIsRouteEmpty = useOrgschemaMenu((state) => state.setIsRouteEmpty);
+
   const setRouteName = useOrgschemaMenu((state) => state.setRouteName);
 
   const setRouteDescription = useOrgschemaMenu(
@@ -38,9 +40,11 @@ export const useRoutes = () => {
 
   useEffect(() => {
     if (isSuccess) {
-      // if (route.flowSteps && route.flowSteps.length === 0) {
-      //   setCurrentRouteScreen(IRouteScreen.MANAGE);
-      // }
+      if (route.flowSteps && route.flowSteps.length === 0) {
+        setIsRouteEmpty(true);
+      } else {
+        setIsRouteEmpty(false);
+      }
 
       return;
     }

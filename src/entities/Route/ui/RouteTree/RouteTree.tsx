@@ -2,7 +2,7 @@
 import { memo } from "react";
 
 import { IRoute } from "../../model/types/route";
-import { RouteBlock } from "../RouteBlock/RouteBlock";
+import { FirstStep } from "../FirstStep/FirstStep";
 
 import { useOrgschemaBoardStore } from "@/src/features/OrgschemaBoard/model/store/orgschemaBoardStore";
 import { subtitle, title } from "@/components/primitives";
@@ -44,7 +44,7 @@ export const RouteTree = memo((props: RouteTreeProps) => {
         transition: "transform 0.2s",
       }}
     >
-      <RouteBlock routeFlow={route.flowSteps[0]} />
+      <FirstStep routeFlow={route.flowSteps[0]} />
     </ul>
   );
 });
