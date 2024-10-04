@@ -42,8 +42,6 @@ export const useRoutes = () => {
     if (isSuccess) {
       if (route.flowSteps && route.flowSteps.length === 0) {
         setIsRouteEmpty(true);
-      } else {
-        setIsRouteEmpty(false);
       }
 
       return;

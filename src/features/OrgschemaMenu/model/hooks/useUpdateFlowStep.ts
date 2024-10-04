@@ -6,6 +6,8 @@ import toast from "react-hot-toast";
 import { IRouteScreen, useOrgschemaMenu } from "../store/orgschemaMenu";
 import { OrgschemaService } from "../services/orgschema";
 
+import { IRoute } from "@/src/entities/Route/model/types/route";
+
 export const useUpdateFlowStep = () => {
   const queryClient = useQueryClient();
 
@@ -19,7 +21,7 @@ export const useUpdateFlowStep = () => {
     useState(false);
 
   const setFlowStepForm = useOrgschemaMenu((state) => state.setFlowStepForm);
-
+  const setIsRouteEmpty = useOrgschemaMenu((state) => state.setIsRouteEmpty);
   const setCurrentRouteScreen = useOrgschemaMenu(
     (state) => state.setCurrentRouteScreen,
   );
@@ -35,6 +37,7 @@ export const useUpdateFlowStep = () => {
         queryKey: ["get route by id", activeRouteId],
       });
 
+      setIsRouteEmpty(false);
       setCurrentRouteScreen(IRouteScreen.MANAGE);
       setFlowStepForm(undefined);
       setSelectedFlowStep(undefined);
@@ -78,7 +81,7 @@ export const useUpdateFlowStep = () => {
     mutationKey: ["delete flow step", activeRouteId, selectedFlowStep?.id],
     mutationFn: () =>
       OrgschemaService.deleteFlowStep(activeRouteId, selectedFlowStep?.id),
-    onSuccess: () => {
+    onSuccess: async () => {
       toast.success("Шаг успешно удален");
       setSelectedFlowStep(undefined);
       setIsDeletedPopoverFlowStepOpen(false);
@@ -86,6 +89,14 @@ export const useUpdateFlowStep = () => {
       queryClient.invalidateQueries({
         queryKey: ["get route by id", activeRouteId],
       });
+
+      const result = await queryClient.fetchQuery<IRoute>({
+        queryKey: ["get route by id", activeRouteId],
+      });
+
+      if (result.flowSteps && result.flowSteps.length === 0) {
+        setIsRouteEmpty(true);
+      }
     },
     onError: (error: any) => {
       toast.error("Ошибка при удалении шага");
