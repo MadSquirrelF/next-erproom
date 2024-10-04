@@ -292,19 +292,18 @@ export const FlowStepForm = memo((props: FlowStepFormProps) => {
   }
 
   // Группируем блоки по scheme_name
-  const groupedBlocks = AllBlocks.reduce<Record<string, INodeShort[]>>(
-    (acc, block) => {
-      const schemeName = block.scheme_name.name;
+  const groupedBlocks = (AllBlocks as INodeShort[]).reduce<
+    Record<string, INodeShort[]>
+  >((acc, block) => {
+    const schemeName = block.scheme_name.name;
 
-      if (!acc[schemeName]) {
-        acc[schemeName] = [];
-      }
-      acc[schemeName].push(block);
+    if (!acc[schemeName]) {
+      acc[schemeName] = [];
+    }
+    acc[schemeName].push(block);
 
-      return acc;
-    },
-    {},
-  );
+    return acc;
+  }, {});
 
   return (
     <form

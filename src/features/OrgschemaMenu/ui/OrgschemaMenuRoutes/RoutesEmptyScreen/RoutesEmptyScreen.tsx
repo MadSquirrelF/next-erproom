@@ -39,6 +39,7 @@ export const RoutesEmptyScreen = memo((props: RoutesEmptyScreenProps) => {
               routeDescription={routeDescription}
               routeName={routeName}
               submit={onSubmitCreateRouteForm}
+              type="create"
               onChangeRouteDescription={onChangeRouteDescription}
               onChangeRouteName={onChangeRouteName}
             />
